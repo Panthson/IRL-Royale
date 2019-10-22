@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using Firebase;
+using Firebase.Database;
+using Firebase.Unity.Editor;
 
 public class GPS : MonoBehaviour
 {
@@ -30,11 +33,18 @@ public class GPS : MonoBehaviour
     public mapType mapSelected;
     public int scale;
 
+    private static DatabaseReference db;
+
     void Start()
     {
         locationService = StartLocationService();
         StartCoroutine(locationService);
-        
+
+        //FirebaseApp.DefaultInstance.SetEditorDatabaseUrl();
+        string DBURL = "https://iroyale-1571440677136.firebaseio.com/";
+        FirebaseDatabase t = FirebaseDatabase.GetInstance(DBURL);
+        db = t.GetReference("");
+        //db = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
     void Update()
@@ -88,6 +98,12 @@ public class GPS : MonoBehaviour
         Debug.Log("Updating Map");
         mapCoroutine = GetGoogleMap(oLat, oLon);
         StartCoroutine(mapCoroutine);
+
+        if (db == null)
+            return;
+        db.Child("lobbies").Child("0").Child("players").Child("0").Child("location").SetValueAsync(oLat + ", " + oLon + "");
+        db.Child("lobbies").Child("0").Child("players").Child("0").Child("attack").SetValueAsync(UnityEngine.Random.Range(0,10));
+        Debug.Log("Writnig to DB");
     }
 
     private IEnumerator GetGoogleMap(float lat, float lon)
