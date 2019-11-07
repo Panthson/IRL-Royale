@@ -14,10 +14,25 @@ public class DatabaseManager : MonoBehaviour
     private const string LOBBIES = "lobbies";
     private const string LOCATION = "location";
     private const string PLAYERS = "players";
+    private const string USERS = "users";
     private const string PLAYERCOUNT = "playerCount";
     private const string ROOT = "";
 
-    
+    public User[] users;
+
+    private static DatabaseManager instance;
+
+    public static DatabaseManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<DatabaseManager>();
+            }
+            return instance;
+        }
+    }
 
     public Mapbox.Examples.LocationStatus loc;
 
@@ -28,9 +43,29 @@ public class DatabaseManager : MonoBehaviour
     private static int totalChildren = -500;
 
     private static bool initialized = false;
-
-    //private IEnumerator 
     
+    public void PopulateUsers()
+    {
+
+    }
+
+    public void GetUser(string id)
+    {
+        db.Child(USERS).Child(id).Child(LOCATION).GetValueAsync().ContinueWithOnMainThread(task => {
+            if (task.IsFaulted)
+            {
+                Debug.Log("ah shit");
+            }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                
+            }
+
+        });
+    }
+
+
     string getCurrentLocation()
     {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
@@ -86,6 +121,8 @@ public class DatabaseManager : MonoBehaviour
         string DBURL = "https://iroyale-1571440677136.firebaseio.com/";
         FirebaseDatabase t = FirebaseDatabase.GetInstance(DBURL);
         db = t.GetReference(ROOT);
+
+        StartCoroutine(getSize());
         /*
         int numPlayers;
         db.Child(PLAYERS).Child(PLAYERCOUNT).GetValueAsync().ContinueWith(task => {
@@ -100,7 +137,7 @@ public class DatabaseManager : MonoBehaviour
           }
       });*/
 
-        
+
 
 
         //playerNum = totalChildren.ToString();
@@ -114,7 +151,7 @@ public class DatabaseManager : MonoBehaviour
 
         if (initialized == false)
         {
-            StartCoroutine(getSize());
+            
             
             Debug.Log("here we go again " + playerNum);
             
@@ -146,8 +183,8 @@ public class Player {
     public Player(string location) {
         this.location = location;
         string[] loc = this.location.Split(SEPARATOR, 2, System.StringSplitOptions.RemoveEmptyEntries);
-        this.lat = float.Parse(loc[0]);
-        this.lon = float.Parse(loc[1]);
+        lat = float.Parse(loc[0]);
+        lon = float.Parse(loc[1]);
     }
 
     public string getLocation() {
