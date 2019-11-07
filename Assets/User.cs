@@ -41,10 +41,10 @@ public class User : MonoBehaviour
     {
         
     }
-
+    
     // Update is called once per frame
     void Update()
     {
-        DatabaseManager.Instance.GetUser(id);
+        //DatabaseManager.Instance.GetUser(id);
     }
 }

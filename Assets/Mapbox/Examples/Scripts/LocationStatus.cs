@@ -9,8 +9,8 @@
 
 	public class LocationStatus : MonoBehaviour
 	{
-
         public Location currLoc;
+        public bool initialized = false;
 
         [SerializeField]
 		Text _statusText;
@@ -47,6 +47,7 @@
 					}
 					else
 					{
+                        initialized = true;
                         _statusText.text = string.Format("{0}", currLoc.LatitudeLongitude);
 					}
 				}
