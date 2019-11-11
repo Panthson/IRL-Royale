@@ -7,6 +7,7 @@ using Firebase;
 using Firebase.Database;
 using Firebase.Unity.Editor;
 using Firebase.Extensions;
+using Firebase.Auth;
 using UnityEngine.UI;
 
 public class DatabaseManager : MonoBehaviour
@@ -17,7 +18,6 @@ public class DatabaseManager : MonoBehaviour
     private const string USERS = "users";
     private const string ROOT = "";
 
-    public Text test;
     public User[] users;
 
     private static DatabaseManager instance;
@@ -25,6 +25,8 @@ public class DatabaseManager : MonoBehaviour
     public Mapbox.Examples.LocationStatus loc;
 
     private static DatabaseReference db;
+
+    private FirebaseAuth auth;
 
     private static string playerNum = "";
 
@@ -43,13 +45,6 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator InitializeLocation() {
-        yield return new WaitUntil(() => loc.initialized);
-
-        test.text = "InitLoc";
-        StartCoroutine(PopulateUsers());
-    }
-
     public IEnumerator PopulateUsers() {
         var task = db.Child(USERS).GetValueAsync();
 
@@ -58,27 +53,45 @@ public class DatabaseManager : MonoBehaviour
         foreach (DataSnapshot user in task.Result.Children) {
             Debug.Log("INSIDE POPULATEUSERS: " + user.Key + " " + (string)user.Value);
         }
-        test.text = "PopUsers";
         StartCoroutine(getSize());
     }
-    
-/*
-    public void GetUser(string id)
+
+    private void InitializeFirebase()
     {
-        db.Child(USERS).Child(id).Child(LOCATION).GetValueAsync().ContinueWithOnMainThread(task => {
+
+        FirebaseApp app = FirebaseApp.DefaultInstance;
+
+        // db link
+        app.SetEditorDatabaseUrl("https://iroyale-1571440677136.firebaseio.com/");
+
+        if (app.Options.DatabaseUrl != null)
+            app.SetEditorDatabaseUrl(app.Options.DatabaseUrl);
+
+        // user authentication
+        auth = FirebaseAuth.DefaultInstance;
+        auth.SignInWithEmailAndPasswordAsync("test@gmail.com", "testtest").ContinueWith(task => {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                return;
+            }
             if (task.IsFaulted)
             {
-                Debug.Log("ah shit");
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                
+                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                return;
             }
 
+            Firebase.Auth.FirebaseUser newUser = task.Result;
+            Debug.LogFormat("User signed in successfully: {0} ({1})",
+                newUser.DisplayName, newUser.UserId);
+
+            db = FirebaseDatabase.DefaultInstance.RootReference;
+
+            //Getting client id for FB using device id
+            initialized = true;
+            //StartCoroutine(getSize());
         });
     }
-    */
 
     string getCurrentLocation() {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
@@ -91,9 +104,7 @@ public class DatabaseManager : MonoBehaviour
 
     private IEnumerator getSize() {
         var task = db.Child(USERS).GetValueAsync();
-        test.text = "getSize1";
         yield return new WaitUntil(() => task.IsCompleted || task.IsFaulted);
-        test.text = "getSize2";
         if (task.IsCompleted)
             totalChildren = (int)task.Result.ChildrenCount;
         else if (task.IsFaulted)
@@ -106,25 +117,24 @@ public class DatabaseManager : MonoBehaviour
         initialized = true;
     }
 
-    public void Test()
-    {
-        string DBURL = "https://iroyale-1571440677136.firebaseio.com/";
-        FirebaseDatabase t = FirebaseDatabase.GetInstance(DBURL);
-        db = t.GetReference(ROOT);
-        test.text = "sTARTING";
-        IEnumerator routine = InitializeLocation();
-        StartCoroutine(routine);
-    }
-
     // Start is called before the first frame update
     public void Start()
     {
-        string DBURL = "https://iroyale-1571440677136.firebaseio.com/";
-        FirebaseDatabase t = FirebaseDatabase.GetInstance(DBURL);
-        db = t.GetReference(ROOT);
-        test.text = "sTARTING";
-        IEnumerator routine = InitializeLocation();
-        StartCoroutine(routine);
+
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            Debug.Log("UH");
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == DependencyStatus.Available)
+            {
+                Debug.Log("DEPENDENCY");
+                InitializeFirebase();
+            }
+            else
+            {
+                Debug.LogError(
+                  "Could not resolve all Firebase dependencies: " + dependencyStatus);
+            }
+        });
     }
 
     // Update is called once per frame
@@ -137,7 +147,8 @@ public class DatabaseManager : MonoBehaviour
             Debug.Log("here we go again");
         }
         else {
-            db.Child(USERS).Child(getPlayerNum()).Child(LOCATION).SetValueAsync(getCurrentLocation());
+            db.Child(USERS).Child("124").Child(LOCATION).SetValueAsync(getCurrentLocation());
+            Debug.Log("updating");
         }
     }
 
@@ -145,5 +156,6 @@ public class DatabaseManager : MonoBehaviour
     void OnApplicationQuit()
     {
         db.Child(USERS).Child(getPlayerNum()).RemoveValueAsync();
+        auth.SignOut();
     }
 }
