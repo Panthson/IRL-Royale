@@ -1,11 +1,12 @@
-﻿using Mapbox.Unity.Location;
+﻿using Firebase.Database;
+using Mapbox.Unity.Location;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class User : MonoBehaviour
 {
-    private readonly static string[] SEPARATOR = { ", " };
+    private readonly static string[] SEPARATOR = { ", ", "\n" };
     public string username;
     public string id;
     public string location;
@@ -30,7 +31,7 @@ public class User : MonoBehaviour
 
     public void SetLocation(string location)
     {
-        string[] loc = this.location.Split(SEPARATOR, 2, System.StringSplitOptions.RemoveEmptyEntries);
+        string[] loc = location.Split(SEPARATOR, 2, System.StringSplitOptions.None);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
         transform.localPosition = LocationProviderFactory.Instance.mapManager.GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
@@ -43,8 +44,27 @@ public class User : MonoBehaviour
     }
     
     // Update is called once per frame
-    void Update()
+    async void Update()
     {
-        //DatabaseManager.Instance.GetUser(id);
+        if (DatabaseManager.Instance.initialized)
+        {
+            DataSnapshot snapshot = null;
+            await DatabaseManager.Instance.Database.Child("users").Child("123").Child("location").GetValueAsync().ContinueWith(task => {
+                if (task.IsFaulted)
+                {
+                    // Handle the error...
+                    Debug.LogError("Task Failed");
+                }
+                else if (task.IsCompleted)
+                {
+                    Debug.Log("Task Completed");
+                    snapshot = task.Result;
+
+                }
+            });
+            if (snapshot != null)
+                SetLocation(snapshot.Value.ToString());
+        }
+        
     }
 }

@@ -18,22 +18,19 @@ public class DatabaseManager : MonoBehaviour
     private const string USERS = "users";
     private const string ROOT = "";
 
-    public User[] users;
-
+    // PRIVATE VARIABLES
     private static DatabaseManager instance;
+    private FirebaseAuth Authenticator;
+    
 
+    // PUBLIC VARIABLES
+    public DatabaseReference Database;
     public Mapbox.Examples.LocationStatus loc;
-
-    private static DatabaseReference db;
-
-    private FirebaseAuth auth;
-
-    private static string playerNum = "";
-
-    private static int totalChildren = -500;
-
-    private static bool initialized = false;
-
+    public bool initialized = false;
+    public List<User> users;
+    public User userRef;
+    
+    // Gives a reference of DatabaseManager using DatabaseManager.Instance
     public static DatabaseManager Instance {
         get
         {
@@ -44,18 +41,35 @@ public class DatabaseManager : MonoBehaviour
             return instance;
         }
     }
+    
+    // Start checks dependencies and runs InitializeFirebase()
+    public void Start()
+    {
 
-    public IEnumerator PopulateUsers() {
-        var task = db.Child(USERS).GetValueAsync();
-
-        yield return new WaitUntil(() => task.IsCompleted || task.IsFaulted);
-
-        foreach (DataSnapshot user in task.Result.Children) {
-            Debug.Log("INSIDE POPULATEUSERS: " + user.Key + " " + (string)user.Value);
-        }
-        StartCoroutine(getSize());
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == DependencyStatus.Available)
+            {
+                InitializeFirebase();
+            }
+            else
+            {
+                Debug.LogError(
+                  "Could not resolve all Firebase dependencies: " + dependencyStatus);
+            }
+        });
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if (initialized)
+        {
+            Database.Child(USERS).Child("124").Child(LOCATION).SetValueAsync(GetCurrentLocation());
+        }
+    }
+
+    // Initializes the Database and Authenticator
     private void InitializeFirebase()
     {
 
@@ -68,8 +82,8 @@ public class DatabaseManager : MonoBehaviour
             app.SetEditorDatabaseUrl(app.Options.DatabaseUrl);
 
         // user authentication
-        auth = FirebaseAuth.DefaultInstance;
-        auth.SignInWithEmailAndPasswordAsync("test@gmail.com", "testtest").ContinueWith(task => {
+        Authenticator = FirebaseAuth.DefaultInstance;
+        Authenticator.SignInWithEmailAndPasswordAsync("test@gmail.com", "testtest").ContinueWith(task => {
             if (task.IsCanceled)
             {
                 Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
@@ -85,77 +99,80 @@ public class DatabaseManager : MonoBehaviour
             Debug.LogFormat("User signed in successfully: {0} ({1})",
                 newUser.DisplayName, newUser.UserId);
 
-            db = FirebaseDatabase.DefaultInstance.RootReference;
+            Database = FirebaseDatabase.DefaultInstance.RootReference;
 
             //Getting client id for FB using device id
             initialized = true;
-            //StartCoroutine(getSize());
+            Debug.Log("Starting PopUsers");
+            PopulateUsers();
         });
     }
 
-    string getCurrentLocation() {
+    // Returns the String of latitude and longitude from mapbox
+    string GetCurrentLocation() {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
     }
 
-    string getPlayerNum()
-    {
-        return playerNum;
-    }
-
-    private IEnumerator getSize() {
-        var task = db.Child(USERS).GetValueAsync();
+    private IEnumerator GetSize() {
+        int totalChildren;
+        var task = Database.Child(USERS).GetValueAsync();
         yield return new WaitUntil(() => task.IsCompleted || task.IsFaulted);
         if (task.IsCompleted)
             totalChildren = (int)task.Result.ChildrenCount;
         else if (task.IsFaulted)
-            Debug.Log("ah shit");
+            Debug.Log("Task Failed");
 
         totalChildren = (int)task.Result.ChildrenCount;
-        playerNum = totalChildren.ToString();
-        Debug.Log("ah shit " + playerNum);
+        string playerNum = totalChildren.ToString();
+        Debug.Log("User Count: " + playerNum);
         
         initialized = true;
     }
 
-    // Start is called before the first frame update
-    public void Start()
+    public async void PopulateUsers()
     {
-
-        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
-            Debug.Log("UH");
-            var dependencyStatus = task.Result;
-            if (dependencyStatus == DependencyStatus.Available)
+        bool init = false;
+        DataSnapshot snapshot = null;
+        Debug.Log("Starting PopUSers");
+        await Database.Child(USERS).GetValueAsync().ContinueWith(task => {
+            if (task.IsFaulted)
             {
-                Debug.Log("DEPENDENCY");
-                InitializeFirebase();
+                // Handle the error...
+                Debug.LogError("Task Failed");
             }
-            else
+            else if (task.IsCompleted)
             {
-                Debug.LogError(
-                  "Could not resolve all Firebase dependencies: " + dependencyStatus);
+                Debug.Log("Task Completed");
+                snapshot = task.Result;
+                
             }
         });
+        if (snapshot != null)
+        {
+            foreach (DataSnapshot user in snapshot.Children)
+            {
+                Debug.Log("User: " + user.Key + " " + user.Child(LOCATION).Value);
+                //User u = Instantiate(userRef, transform.position, transform.rotation, transform);
+                //Debug.Log("Instantiated");
+                //userRef.SetUser(user.Key, user.Key, user.Child(LOCATION).Value.ToString());
+                //users.Add(userRef);
+            }
+        }
+        //StartCoroutine(GetSize());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (db == null)
-            return;
-
-        if (initialized == false) {
-            Debug.Log("here we go again");
-        }
-        else {
-            db.Child(USERS).Child("124").Child(LOCATION).SetValueAsync(getCurrentLocation());
-            Debug.Log("updating");
-        }
-    }
+    
 
     // on application quit, delete player from database
-    void OnApplicationQuit()
+    void OnApplicationPause()
     {
-        db.Child(USERS).Child(getPlayerNum()).RemoveValueAsync();
-        auth.SignOut();
+        if (Database != null)
+        {
+            Database.Child(USERS).Child("124").RemoveValueAsync();
+        }
+        if (Authenticator != null)
+        {
+            Authenticator.SignOut();
+        }
     }
 }
