@@ -12,13 +12,11 @@ using System;
 public class AddUsers : MonoBehaviour
 {
     private Players data;
-    public Text emailInput, passwordInput, username;
+    public InputField emailInput, passwordInput, confirmPasswordInput, username;
 
     private DatabaseReference databaseReference;
 
     private string DATA_URL = "https://iroyale-1571440677136.firebaseio.com/";
-
-    private LogIn log = new LogIn();
 
     // Start is called before the first frame update
     void Start() {
@@ -27,23 +25,71 @@ public class AddUsers : MonoBehaviour
     }
 
     public void CreateNewUser() {
-        if (emailInput.text.Equals("") || passwordInput.text.Equals(""))
+        if (emailInput.text.Equals("") || passwordInput.text.Equals("") || confirmPasswordInput.text.Equals("")
+            || username.text.Equals(""))
         {
-            //  print("Please enter an email, password, and username to register");
+            Debug.Log("all fields not filled in");
             return;
         }
 
-        log.Register(emailInput, passwordInput, username);
-        //Update
-        data = new Players(username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
-
-        string jsonData = JsonUtility.ToJson(data);
-        if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")
+        if (!passwordInput.text.Equals(confirmPasswordInput.text))
         {
-            print("user id: " + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
-            databaseReference.Child("users").Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
-              SetRawJsonValueAsync(jsonData);
+            Debug.Log("password and confirm not the same");
+            return;
         }
+
+        Register(emailInput.text, passwordInput.text, username.text);
+    }
+
+    public void Register(string emailInput, string passwordInput, string username)
+    {
+        if (emailInput.Equals("") && passwordInput.Equals("") && username.Equals(""))
+        {
+            return;
+        }
+
+        FirebaseAuth.DefaultInstance.CreateUserWithEmailAndPasswordAsync(emailInput, 
+            passwordInput).ContinueWith((task =>
+        {
+            if (task.IsCanceled)
+            {
+                Firebase.FirebaseException e =
+              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+
+                GetErrorMessage((AuthError)e.ErrorCode);
+                return;
+            }
+
+            if (task.IsFaulted)
+            {
+                Firebase.FirebaseException e =
+              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                GetErrorMessage((AuthError)e.ErrorCode);
+                return;
+            }
+            // Firebase user has been created.
+            Firebase.Auth.FirebaseUser newUser = task.Result;
+            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+                newUser.DisplayName, newUser.UserId);
+
+            //Update
+            data = new Players(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+
+            string jsonData = JsonUtility.ToJson(data);
+            if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")
+            {
+                print("user id: " + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+                databaseReference.Child("users").Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
+                  SetRawJsonValueAsync(jsonData);
+            }
+        }));
+    }
+
+    void GetErrorMessage(AuthError errorCode)
+    {
+        string msg = "";
+        msg = errorCode.ToString();
+        Debug.Log(msg);
     }
 
     // Update is called once per frame

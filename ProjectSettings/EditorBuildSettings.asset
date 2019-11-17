@@ -6,12 +6,21 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Dev Build.unity
-    guid: f1df56550055d2248addc39907f199de
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
     path: Assets/Mapbox/Examples/0_PrefabScenes/Location-basedGame.unity
     guid: 42f6aa7ce7a604f16ade319663f46ceb
   - enabled: 1
     path: Assets/Scenes/Mapbox.unity
     guid: f67424b28a6a43949aa8e4d121d80221
+  - enabled: 1
+    path: Assets/Scenes/Login.unity
+    guid: 6f24e668a0b7e424a8801f4b61a9f884
+  - enabled: 1
+    path: Assets/Scenes/Signup.unity
+    guid: 533975357c6a96c4188f378db9af2aa2
+  - enabled: 1
+    path: Assets/Scenes/Home.unity
+    guid: add3a8f4f75cb1b44b3e40da45db8b01
   m_configObjects: {}

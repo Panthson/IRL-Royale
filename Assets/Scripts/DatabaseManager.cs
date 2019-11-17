@@ -28,6 +28,7 @@ public class DatabaseManager : MonoBehaviour {
     public bool initialized = false;
     public List<User> users;
     public User userRef;
+    public Image loading;
     
     // Gives a reference of DatabaseManager using DatabaseManager.Instance
     public static DatabaseManager Instance {
@@ -43,7 +44,8 @@ public class DatabaseManager : MonoBehaviour {
     
     // Start checks dependencies and runs InitializeFirebase()
     public void Start() {
-
+        loading.enabled = true;
+        Debug.Log("starting dbmanager");
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             var dependencyStatus = task.Result;
             if (dependencyStatus == DependencyStatus.Available)
@@ -62,12 +64,16 @@ public class DatabaseManager : MonoBehaviour {
     void Update() {
         if (initialized)
         {
-            Database.Child(USERS).Child("124").Child(LOCATION).SetValueAsync(GetCurrentLocation());
+            Database.Child(USERS).Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
+                Child(LOCATION).SetValueAsync(GetCurrentLocation());
         }
     }
 
     // Initializes the Database and Authenticator
     private void InitializeFirebase() {
+        Debug.Log(LoginInfo.Email);
+        Debug.Log(LoginInfo.Password);
+        Debug.Log(LoginInfo.Uid);
 
         FirebaseApp app = FirebaseApp.DefaultInstance;
 
@@ -79,29 +85,60 @@ public class DatabaseManager : MonoBehaviour {
 
         // user authentication
         Authenticator = FirebaseAuth.DefaultInstance;
-        Authenticator.SignInWithEmailAndPasswordAsync("test@gmail.com", "testtest").ContinueWith(task => {
-            if (task.IsCanceled)
+
+        if(!LoginInfo.IsGuest)
+            Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email, LoginInfo.Password).ContinueWith(task => {
+                if (task.IsCanceled)
+                {
+                    Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                    return;
+                }
+                if (task.IsFaulted)
+                {
+                    Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                    return;
+                }
+
+            
+                Firebase.Auth.FirebaseUser newUser = task.Result;
+                Debug.LogFormat("User signed in successfully: {0} ({1})",
+                    newUser.DisplayName, newUser.UserId);
+
+                Database = FirebaseDatabase.DefaultInstance.RootReference;
+
+                //Getting client id for FB using device id
+                //initialized = true;
+                Debug.Log("Starting PopUsers");
+                PopulateUsers();
+            });
+        else
+            FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith((task =>
             {
-                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
-                return;
-            }
-            if (task.IsFaulted)
-            {
-                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                return;
-            }
+                if (task.IsCanceled)
+                {
+                    Firebase.FirebaseException e =
+                  task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                    return;
+                }
+                if (task.IsFaulted)
+                {
 
-            Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("User signed in successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
+                    Firebase.FirebaseException e =
+                    task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                    return;
+                }
 
-            Database = FirebaseDatabase.DefaultInstance.RootReference;
+                Firebase.Auth.FirebaseUser newUser = task.Result;
+                Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+                    newUser.DisplayName, newUser.UserId);
 
-            //Getting client id for FB using device id
-            initialized = true;
-            Debug.Log("Starting PopUsers");
-            PopulateUsers();
-        });
+                Database = FirebaseDatabase.DefaultInstance.RootReference;
+
+                //Getting client id for FB using device id
+                //initialized = true;
+                Debug.Log("Starting PopUsers");
+                PopulateUsers();
+            }));
     }
 
     // Returns the String of latitude and longitude from mapbox
@@ -109,6 +146,7 @@ public class DatabaseManager : MonoBehaviour {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
     }
 
+    /*
     private IEnumerator GetSize() {
         int totalChildren;
         var task = Database.Child(USERS).GetValueAsync();
@@ -123,12 +161,13 @@ public class DatabaseManager : MonoBehaviour {
         Debug.Log("User Count: " + playerNum);
         
         initialized = true;
-    }
+        loading.enabled = false;
+    }*/
 
     public async void PopulateUsers() {
-        bool init = false;
         DataSnapshot snapshot = null;
-        Debug.Log("Starting PopUSers");
+        Debug.Log("Starting PopUsers");
+        
         await Database.Child(USERS).GetValueAsync().ContinueWith(task => {
             if (task.IsFaulted)
             {
@@ -142,6 +181,7 @@ public class DatabaseManager : MonoBehaviour {
                 
             }
         });
+
         if (snapshot != null)
         {
             foreach (DataSnapshot user in snapshot.Children)
@@ -154,13 +194,29 @@ public class DatabaseManager : MonoBehaviour {
             }
         }
         //StartCoroutine(GetSize());
+
+        initialized = true;
     }
 
     // on application quit, delete player from database
     void OnApplicationPause() {
         if (Database != null)
         {
-            Database.Child(USERS).Child("124").RemoveValueAsync();
+            if (LoginInfo.IsGuest)
+                Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+        }
+        if (Authenticator != null)
+        {
+            Authenticator.SignOut();
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        if (Database != null)
+        {
+            if (LoginInfo.IsGuest)
+                Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
         }
         if (Authenticator != null)
         {
