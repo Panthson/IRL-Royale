@@ -1,55 +1,37 @@
 {
-  "project_info": {
-    "project_number": "455362007324",
-    "firebase_url": "https://iroyale-1571440677136.firebaseio.com",
-    "project_id": "iroyale-1571440677136",
-    "storage_bucket": "iroyale-1571440677136.appspot.com"
-  },
   "client": [
     {
+      "services": {
+        "appinvite_service": {
+          "status": 1
+        }, 
+        "analytics_service": {
+          "status": 0
+        }
+      }, 
+      "oauth_client": [
+        {
+          "client_id": "455362007324-7pqer82qen6l0gi1012m48tonfsn041e.apps.googleusercontent.com"
+        }
+      ], 
+      "api_key": [
+        {
+          "current_key": "AIzaSyAt48GW9UNIQrWRGn6jtcvV5RBRv3YbFGA"
+        }
+      ], 
       "client_info": {
-        "mobilesdk_app_id": "1:455362007324:android:f50107754e6a3c4042aad9",
+        "mobilesdk_app_id": "1:455362007324:ios:14e86cd43a3a03ee42aad9", 
         "android_client_info": {
           "package_name": "com.CBT.IRLRoyale"
         }
-      },
-      "oauth_client": [
-        {
-          "client_id": "455362007324-e3arl4r8om4cbuk1d7724hcft96ujoe4.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.CBT.IRLRoyale",
-            "certificate_hash": "2b266f7f279ae6d3b35aa0783b34564175ca011f"
-          }
-        },
-        {
-          "client_id": "455362007324-9klfg5r6g00hsp1pg9qip54q34rabpe2.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyATgKBNElbuidG_I7wUd3FgC9SHm54JZ_c"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "455362007324-9klfg5r6g00hsp1pg9qip54q34rabpe2.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "455362007324-7pqer82qen6l0gi1012m48tonfsn041e.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.CBT.IRLRoyale"
-              }
-            }
-          ]
-        }
       }
     }
-  ],
-  "configuration_version": "1"
+  ], 
+  "configuration_version": "1", 
+  "project_info": {
+    "storage_bucket": "iroyale-1571440677136.appspot.com", 
+    "project_id": "iroyale-1571440677136", 
+    "firebase_url": "https://iroyale-1571440677136.firebaseio.com", 
+    "project_number": "455362007324"
+  }
 }
