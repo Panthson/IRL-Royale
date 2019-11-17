@@ -7,9 +7,11 @@ using UnityEngine;
 public class User : MonoBehaviour
 {
     private readonly static string[] SEPARATOR = { ", ", "\n" };
+    
     public string username;
     public string id;
     public string location;
+    
     //public string squadId;
     //public string lobbyId;
     //equipped weapon
