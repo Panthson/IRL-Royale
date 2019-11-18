@@ -7,11 +7,18 @@ using UnityEngine;
 public class User : MonoBehaviour
 {
     private readonly static string[] SEPARATOR = { ", ", "\n" };
-    
-    public string username;
-    public string id;
-    public string location;
-    
+    private const string ID = "id";
+    private const string LOCATION = "location";
+    private const string USERNAME = "username";
+
+    //public GameObject user;
+
+    public string username = null;
+    public string id = null;
+    public string location = null;
+    public DatabaseReference db = null;
+    private bool initialized = false;
+
     //public string squadId;
     //public string lobbyId;
     //equipped weapon
@@ -24,49 +31,44 @@ public class User : MonoBehaviour
     //deaths
     //icons
 
-    public void SetUser(string username, string id, string location)
+    public void InitializeUser(string username, string id, string location, 
+        DatabaseReference db)
     {
         this.username = username;
         this.id = id;
+        this.db = db;
+        this.db.ValueChanged += HandleLocationChanged;
         SetLocation(location);
+        initialized = true;
     }
 
     public void SetLocation(string location)
     {
-        string[] loc = location.Split(SEPARATOR, 2, System.StringSplitOptions.None);
+        string[] loc = location.Split(SEPARATOR, 2, 
+            System.StringSplitOptions.None);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
-        transform.localPosition = LocationProviderFactory.Instance.mapManager.GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
+        transform.localPosition = LocationProviderFactory.Instance.mapManager.
+            GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
     }
 
-    // Start is called before the first frame update
-    void Start()
+    void HandleLocationChanged(object sender, ValueChangedEventArgs args)
     {
-        
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+
+
+        location = args.Snapshot.Child(LOCATION).Value.ToString();
     }
     
     // Update is called once per frame
-    async void Update()
+    void Update()
     {
-        if (DatabaseManager.Instance.initialized)
-        {
-            DataSnapshot snapshot = null;
-            await DatabaseManager.Instance.Database.Child("users").Child("123").Child("location").GetValueAsync().ContinueWith(task => {
-                if (task.IsFaulted)
-                {
-                    // Handle the error...
-                    Debug.LogError("Task Failed");
-                }
-                else if (task.IsCompleted)
-                {
-                    Debug.Log("Task Completed");
-                    snapshot = task.Result;
-
-                }
-            });
-            if (snapshot != null)
-                SetLocation(snapshot.Value.ToString());
-        }
-        
+        if(initialized)
+            SetLocation(this.location);
     }
 }
