@@ -17,7 +17,7 @@ public class DatabaseManager : MonoBehaviour {
     private const string ID = "id";
     private const string LOCATION = "location";
     private const string USERNAME = "username";
-    private const string USERS = "users";
+    private const string USERS = LOBBIES + "/0/users";
     private const string ROOT = "";
     private readonly static string[] SEPARATOR = { ", ", "\n" };
 
@@ -92,56 +92,64 @@ public class DatabaseManager : MonoBehaviour {
         // user authentication
         Authenticator = FirebaseAuth.DefaultInstance;
 
-        if(!LoginInfo.IsGuest)
-            Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email, 
-                LoginInfo.Password).ContinueWith(task => {
-                if (task.IsCanceled)
-                {
-                    Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
-                    return;
-                }
-                if (task.IsFaulted)
-                {
-                    Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                    return;
-                }
-
-            
-                Firebase.Auth.FirebaseUser newUser = task.Result;
-                Debug.LogFormat("User signed in successfully: {0} ({1})",
-                    newUser.DisplayName, newUser.UserId);
-
-                Database = FirebaseDatabase.DefaultInstance.RootReference;
-
-                //Getting client id for FB using device id
-                //initialized = true;
-                GetUsers();
-            });
+        if (!LoginInfo.IsGuest)
+            LoginAsUser();
         else
-            FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
+            LoginAsGuest();
+    }
+
+    private void LoginAsGuest(){
+        FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
+        {
+            if (task.IsCanceled)
             {
-                if (task.IsCanceled)
+                Firebase.FirebaseException e =
+                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Firebase.FirebaseException e =
+                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                return;
+            }
+
+            Firebase.Auth.FirebaseUser newUser = task.Result;
+            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+                newUser.DisplayName, newUser.UserId);
+
+            Database = FirebaseDatabase.DefaultInstance.RootReference;
+
+            GetUsers();
+        });
+    }
+
+    private void LoginAsUser(){
+        Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email,
+                LoginInfo.Password).ContinueWith(task =>
                 {
-                    Firebase.FirebaseException e =
-                  task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                    return;
-                }
-                if (task.IsFaulted)
-                {
+                    if (task.IsCanceled)
+                    {
+                        Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                        return;
+                    }
+                    if (task.IsFaulted)
+                    {
+                        Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                        return;
+                    }
 
-                    Firebase.FirebaseException e =
-                    task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                    return;
-                }
 
-                Firebase.Auth.FirebaseUser newUser = task.Result;
-                Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                    newUser.DisplayName, newUser.UserId);
+                    Firebase.Auth.FirebaseUser newUser = task.Result;
+                    Debug.LogFormat("User signed in successfully: {0} ({1})",
+                        newUser.DisplayName, newUser.UserId);
 
-                Database = FirebaseDatabase.DefaultInstance.RootReference;
+                    Database = FirebaseDatabase.DefaultInstance.RootReference;
 
-                GetUsers();
-            });
+                    //Getting client id for FB using device id
+                    //initialized = true;
+                    GetUsers();
+                });
     }
 
     // Returns the String of latitude and longitude from mapbox
