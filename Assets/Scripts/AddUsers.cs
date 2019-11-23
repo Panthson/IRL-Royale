@@ -18,6 +18,20 @@ public class AddUsers : MonoBehaviour
 
     private string DATA_URL = "https://iroyale-1571440677136.firebaseio.com/";
 
+    //Update panel
+
+    public GameObject comfPanel;
+
+    public GameObject ErrorPanel;
+
+    public GameObject errorText;
+
+    private bool is_SignUp = false;
+
+    private bool is_errorMessage = false;
+
+    private string msg = "";
+
     // Start is called before the first frame update
     void Start() {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl(DATA_URL);
@@ -29,12 +43,15 @@ public class AddUsers : MonoBehaviour
             || username.text.Equals(""))
         {
             Debug.Log("all fields not filled in");
+            OpenPanel("all fields not filled in");
+
             return;
         }
 
         if (!passwordInput.text.Equals(confirmPasswordInput.text))
         {
             Debug.Log("password and confirm not the same");
+            OpenPanel("password and confirm not the same");
             return;
         }
 
@@ -81,20 +98,55 @@ public class AddUsers : MonoBehaviour
                 print("user id: " + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
                 databaseReference.Child("users").Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
                   SetRawJsonValueAsync(jsonData);
+                is_SignUp = true;
             }
         }));
+
     }
 
     void GetErrorMessage(AuthError errorCode)
     {
-        string msg = "";
+        msg = "";
         msg = errorCode.ToString();
+        is_errorMessage = true;
+        OpenPanel(msg);
         Debug.Log(msg);
+    }
+
+    public void OpenPanel()
+    {
+        if(comfPanel != null)
+        {
+            comfPanel.SetActive(true);
+        }
+    }
+
+    public void OpenPanel(string msg)
+    {
+        if(comfPanel != null)
+        {
+            bool isActive = ErrorPanel.activeSelf;
+            ErrorPanel.SetActive(!isActive);
+            errorText.SetActive(true);
+            errorText.GetComponent<Text>().text = msg;
+
+        }
+        if (is_errorMessage)
+        {
+            is_errorMessage = false;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (is_SignUp)
+        {
+            OpenPanel();
+        }
+        if (is_errorMessage)
+        {
+            OpenPanel(msg);
+        }
     }
 }
