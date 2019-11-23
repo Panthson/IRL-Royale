@@ -11,7 +11,7 @@ using System;
 
 public class AddUsers : MonoBehaviour
 {
-    private Players data;
+    private Player data;
     public InputField emailInput, passwordInput, confirmPasswordInput, username;
 
     private DatabaseReference databaseReference;
@@ -80,7 +80,7 @@ public class AddUsers : MonoBehaviour
             if (task.IsFaulted)
             {
                 Firebase.FirebaseException e =
-              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
                 GetErrorMessage((AuthError)e.ErrorCode);
                 return;
             }
@@ -90,7 +90,7 @@ public class AddUsers : MonoBehaviour
                 newUser.DisplayName, newUser.UserId);
 
             //Update
-            data = new Players(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+            data = new Player(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
 
             string jsonData = JsonUtility.ToJson(data);
             if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")

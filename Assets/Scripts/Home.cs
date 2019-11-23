@@ -10,6 +10,8 @@ using Firebase.Unity.Editor;
 
 public class Home : MonoBehaviour
 {
+    private string ANONYMOUS_USERNAME = "anonymous";
+
     private DatabaseReference databaseReference;
 
     private bool signed_in = false;

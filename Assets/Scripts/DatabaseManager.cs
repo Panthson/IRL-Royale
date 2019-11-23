@@ -11,20 +11,22 @@ using Firebase.Auth;
 using UnityEngine.UI;
 using Mapbox.Unity.Location;
 
-public class DatabaseManager : MonoBehaviour {
+public class DatabaseManager : MonoBehaviour
+{
     // CONSTANTS
     private const string LOBBIES = "lobbies";
     private const string ID = "id";
     private const string LOCATION = "location";
     private const string USERNAME = "username";
-    private const string USERS = LOBBIES + "/0/users";
+    private const string USERS = "users";
     private const string ROOT = "";
+    private string ANONYMOUS_USERNAME = "anonymous";
     private readonly static string[] SEPARATOR = { ", ", "\n" };
 
     // PRIVATE VARIABLES
     private static DatabaseManager instance;
     private FirebaseAuth Authenticator;
-    
+
 
     // PUBLIC VARIABLES
     public DatabaseReference Database;
@@ -36,9 +38,11 @@ public class DatabaseManager : MonoBehaviour {
 
     private DataSnapshot usertree;
     private bool instantiateUsers = false;
-    
+    private bool doItAgain = true;
+
     // Gives a reference of DatabaseManager using DatabaseManager.Instance
-    public static DatabaseManager Instance {
+    public static DatabaseManager Instance
+    {
         get
         {
             if (instance == null)
@@ -48,9 +52,10 @@ public class DatabaseManager : MonoBehaviour {
             return instance;
         }
     }
-    
+
     // Start checks dependencies and runs InitializeFirebase()
-    public void Start() {
+    public void Start()
+    {
         loading.enabled = true;
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             var dependencyStatus = task.Result;
@@ -67,20 +72,23 @@ public class DatabaseManager : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update() {
-        if (instantiateUsers) {
+    void Update()
+    {
+        if (instantiateUsers && doItAgain)
+        {
             instantiateUsers = false;
             InstantiateUsers();
         }
         if (initialized)
         {
-            Database.Child(USERS).Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
+            Database.Child(USERS).Child(LoginInfo.Uid).
                 Child(LOCATION).SetValueAsync(GetCurrentLocation());
         }
     }
 
     // Initializes the Database and Authenticator
-    private void InitializeFirebase() {
+    private void InitializeFirebase()
+    {
         FirebaseApp app = FirebaseApp.DefaultInstance;
 
         // db link
@@ -93,41 +101,8 @@ public class DatabaseManager : MonoBehaviour {
         Authenticator = FirebaseAuth.DefaultInstance;
 
         if (!LoginInfo.IsGuest)
-            LoginAsUser();
-        else
-            LoginAsGuest();
-    }
-
-    private void LoginAsGuest(){
-        FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
-        {
-            if (task.IsCanceled)
-            {
-                Firebase.FirebaseException e =
-                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                return;
-            }
-            if (task.IsFaulted)
-            {
-                Firebase.FirebaseException e =
-                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                return;
-            }
-
-            Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
-
-            Database = FirebaseDatabase.DefaultInstance.RootReference;
-
-            GetUsers();
-        });
-    }
-
-    private void LoginAsUser(){
-        Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email,
-                LoginInfo.Password).ContinueWith(task =>
-                {
+            Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email,
+                LoginInfo.Password).ContinueWith(task => {
                     if (task.IsCanceled)
                     {
                         Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
@@ -150,10 +125,44 @@ public class DatabaseManager : MonoBehaviour {
                     //initialized = true;
                     GetUsers();
                 });
+        else
+            FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
+            {
+                if (task.IsCanceled)
+                {
+                    Firebase.FirebaseException e =
+                  task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                    return;
+                }
+                if (task.IsFaulted)
+                {
+
+                    Firebase.FirebaseException e =
+                    task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                    return;
+                }
+
+                Firebase.Auth.FirebaseUser newUser = task.Result;
+                Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+                    newUser.DisplayName, newUser.UserId);
+
+                Database = FirebaseDatabase.DefaultInstance.RootReference;
+
+                Player data = new Player(ANONYMOUS_USERNAME, LoginInfo.Uid);
+
+                string jsonData = JsonUtility.ToJson(data);
+
+                Database.Child("users").Child(LoginInfo.Uid).
+                      SetRawJsonValueAsync(jsonData).ContinueWith(task2 =>
+                      {
+                          GetUsers();
+                      });
+            });
     }
 
     // Returns the String of latitude and longitude from mapbox
-    string GetCurrentLocation() {
+    string GetCurrentLocation()
+    {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
     }
 
@@ -175,10 +184,11 @@ public class DatabaseManager : MonoBehaviour {
         loading.enabled = false;
     }*/
 
-    public async void GetUsers() {
+    public async void GetUsers()
+    {
         DataSnapshot snapshot = null;
         Debug.Log("Getting Users");
-        
+
         await Database.Child(USERS).GetValueAsync().ContinueWith(task => {
             if (task.IsFaulted)
             {
@@ -188,7 +198,7 @@ public class DatabaseManager : MonoBehaviour {
             else if (task.IsCompleted)
             {
                 snapshot = task.Result;
-                
+
             }
         });
 
@@ -198,10 +208,11 @@ public class DatabaseManager : MonoBehaviour {
             instantiateUsers = true;
         }
 
-        
+
     }
 
-    public void InstantiateUsers() {
+    public void InstantiateUsers()
+    {
         Debug.Log("instantiating users");
         foreach (DataSnapshot user in usertree.Children)
         {
@@ -213,25 +224,35 @@ public class DatabaseManager : MonoBehaviour {
             u.InitializeUser(user.Child(USERNAME).Value.ToString(),
                 user.Child(ID).Value.ToString(), user.Child(LOCATION).Value.ToString(),
                 Database.Child(USERS).Child(user.Key));
+
             users.Add(u);
         }
 
         initialized = true;
+        doItAgain = false;
     }
 
     // on application quit, delete player from database
-    void OnApplicationPause() {
-        if (Database != null)
+    void OnApplicationPause(bool paused)
+    {
+        if (paused)
         {
-            if (LoginInfo.IsGuest)
-                Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
-        }
-        if (Authenticator != null)
+            if (Database != null)
+            {
+                if (LoginInfo.IsGuest)
+                    Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+            }
+            if (Authenticator != null)
+            {
+                Authenticator.SignOut();
+            }
+        } else
         {
-            Authenticator.SignOut();
+                Start();
         }
     }
 
+    /*
     void OnApplicationQuit()
     {
         if (Database != null)
@@ -243,5 +264,5 @@ public class DatabaseManager : MonoBehaviour {
         {
             Authenticator.SignOut();
         }
-    }
+    }*/
 }

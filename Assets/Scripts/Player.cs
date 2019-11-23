@@ -9,15 +9,15 @@ using UnityEngine.UI;
 using System;
 
 [Serializable]
-public class Players
+public class Player
 {
     public string username;
     public string id;
     public string location;
 
-    public Players() { }
+    public Player() { }
 
-    public Players(string name, string id)
+    public Player(string name, string id)
     {
         username = name;
         this.id = id;
