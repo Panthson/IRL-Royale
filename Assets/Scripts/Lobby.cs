@@ -8,9 +8,9 @@ using UnityEngine;
 public class Lobby : MonoBehaviour
 {
     private readonly static string[] SEPARATOR = { ", ", "\n" };
-    private const string ID = "id";
     private const string LOCATION = "location";
     private const string ISACTIVE = "isActive";
+    private const string PLAYERNUM = "playerNum";
     private const string PLAYERS = "players";
     private const string RADIUS = "radius";
     private const string TIMER = "timer";
@@ -24,6 +24,8 @@ public class Lobby : MonoBehaviour
     public int timer;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
+
+    private IEnumerator resizeRadius;
 
     public float LobbyRange
     {
@@ -57,6 +59,8 @@ public class Lobby : MonoBehaviour
         this.lobbyName = lobbyName;
         this.playerNum = playerNum;
         this.radius = radius;
+        resizeRadius = SetRadiusSize(radius);
+        StartCoroutine(resizeRadius);
         this.timer = timer;
         this.db = db;
         this.db.ValueChanged += HandleIsActiveChanged;
@@ -87,6 +91,18 @@ public class Lobby : MonoBehaviour
         isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
     }
 
+    void HandlePlayerNumChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+
+        isActive = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
+    }
+
     void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
@@ -109,7 +125,9 @@ public class Lobby : MonoBehaviour
         // Do something with the data in args.Snapshot
 
         radius = float.Parse(args.Snapshot.Child(RADIUS).Value.ToString());
-        StartCoroutine(SetRadiusSize(radius));
+        StopCoroutine(resizeRadius);
+        resizeRadius = SetRadiusSize(radius);
+        StartCoroutine(resizeRadius);
     }
 
     void HandleTimerChanged(object sender, ValueChangedEventArgs args)

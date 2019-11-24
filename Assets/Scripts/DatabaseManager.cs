@@ -10,6 +10,7 @@ using Firebase.Extensions;
 using Firebase.Auth;
 using UnityEngine.UI;
 using Mapbox.Unity.Location;
+using System;
 
 public class DatabaseManager : MonoBehaviour
 {
@@ -21,6 +22,14 @@ public class DatabaseManager : MonoBehaviour
     private const string USERS = "users";
     private const string ROOT = "";
     private string ANONYMOUS_USERNAME = "anonymous";
+
+    private const string ISACTIVE = "isActive";
+    private const string LOBBYNAME = "lobbyName";
+    private const string PLAYERNUM = "playerNum";
+    private const string PLAYERS = "players";
+    private const string RADIUS = "radius";
+    private const string TIMER = "timer";
+
     private readonly static string[] SEPARATOR = { ", ", "\n" };
 
     // PRIVATE VARIABLES
@@ -33,10 +42,15 @@ public class DatabaseManager : MonoBehaviour
     public bool initialized = false;
     public List<User> users;
     public User userRef;
+    public List<Lobby> lobbies;
+    public Lobby lobbyRef;
 
-    private DataSnapshot usertree;
+    private DataSnapshot userTree;
+    private DataSnapshot lobbyTree;
     private bool instantiateUsers = false;
-    private bool doItAgain = true;
+    private bool instantiateLobbies = false;
+    private bool doItAgainUsers = true;
+    private bool doItAgainLobbies = true;
 
     // Gives a reference of DatabaseManager using DatabaseManager.Instance
     public static DatabaseManager Instance
@@ -71,11 +85,20 @@ public class DatabaseManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (instantiateUsers && doItAgain)
+        if (instantiateUsers && doItAgainUsers)
         {
             instantiateUsers = false;
+            doItAgainUsers = false;
             InstantiateUsers();
         }
+
+        if (instantiateLobbies && doItAgainLobbies) 
+        {
+            instantiateLobbies = false;
+            doItAgainLobbies = false;
+            InstantiateLobbies();
+        }
+
         if (initialized)
         {
             Player.player = Database.Child(USERS).Child(LoginInfo.Uid);
@@ -119,8 +142,9 @@ public class DatabaseManager : MonoBehaviour
                     Database = FirebaseDatabase.DefaultInstance.RootReference;
 
                     //Getting client id for FB using device id
-                    //initialized = true;
+                    initialized = true;
                     GetUsers();
+                    GetLobbies();
                 });
         else
             FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
@@ -152,7 +176,9 @@ public class DatabaseManager : MonoBehaviour
                 Database.Child("users").Child(LoginInfo.Uid).
                       SetRawJsonValueAsync(jsonData).ContinueWith(task2 =>
                       {
+                          initialized = true;
                           GetUsers();
+                          GetLobbies();
                       });
             });
     }
@@ -177,15 +203,40 @@ public class DatabaseManager : MonoBehaviour
 
         if (snapshot != null)
         {
-            usertree = snapshot;
+            userTree = snapshot;
             instantiateUsers = true;
+        }
+    }
+
+    public async void GetLobbies()
+    {
+        DataSnapshot snapshot = null;
+        Debug.Log("Getting Lobbies");
+
+        await Database.Child(LOBBIES).GetValueAsync().ContinueWith(task => {
+            if (task.IsFaulted)
+            {
+                // Handle the error...
+                Debug.LogError("Task Failed");
+            }
+            else if (task.IsCompleted)
+            {
+                snapshot = task.Result;
+
+            }
+        });
+
+        if (snapshot != null)
+        {
+            lobbyTree = snapshot;
+            instantiateLobbies = true;
         }
     }
 
     public void InstantiateUsers()
     {
         Debug.Log("instantiating users");
-        foreach (DataSnapshot user in usertree.Children)
+        foreach (DataSnapshot user in userTree.Children)
         {
             if (user.Key.Equals(LoginInfo.Uid))
                 continue;
@@ -199,8 +250,27 @@ public class DatabaseManager : MonoBehaviour
             users.Add(u);
         }
 
-        initialized = true;
-        doItAgain = false;
+        //initialized = true;
+        
+    }
+    public void InstantiateLobbies()
+    {
+        Debug.Log("instantiating lobbies");
+        foreach (DataSnapshot lobby in lobbyTree.Children)
+        {
+            Lobby l = Instantiate(lobbyRef, Vector3.zero, Quaternion.identity, transform);
+
+            l.InitializeLobby(Int32.Parse(lobby.Child(ISACTIVE).Value.ToString()),
+                lobby.Child(LOCATION).Value.ToString(), lobby.Child(LOBBYNAME).Value.ToString(),
+                Int32.Parse(lobby.Child(PLAYERNUM).Value.ToString()),
+                lobby.Child(PLAYERS).Value.ToString(), float.Parse(lobby.Child(RADIUS).Value.ToString()),
+                Int32.Parse(lobby.Child(TIMER).Value.ToString()), Database.Child(LOBBIES).Child(lobby.Key));
+
+            lobbies.Add(l);
+        }
+
+        //initialized = true;
+        
     }
 
     // on application quit, delete player from database
