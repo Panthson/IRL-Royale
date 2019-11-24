@@ -7,17 +7,17 @@ using System;
 
 public class Player : MonoBehaviour
 {
-    public string username;
-    public string id;
-    public string location;
+    private const string LOCATION = "location";
+    private const string HEALTH = "health";
+    private const string ATTACK = "attack";
 
+    public static PlayerData playerData;
     public Mapbox.Examples.LocationStatus loc;
     private float health;
-    public float Attack;
-    public float Defense;
+    public float attack = 5f;
     public Range range;
     public Image HealthBar;
-    public DatabaseReference player;
+    public static DatabaseReference player;
 
     private static Player instance;
     public static Player Instance
@@ -100,10 +100,17 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void HandleHealthChanged(object sender, ValueChangedEventArgs args)
     {
-        
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+
+
+        Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
     }
 
     // Update is called once per frame
@@ -111,12 +118,12 @@ public class Player : MonoBehaviour
     {
         if (player != null)
         {
-            
+            player.Child(LOCATION).SetValueAsync(GetCurrentLocation());
         }
     }
 
     // Returns the String of latitude and longitude from mapbox
-    string GetCurrentLocation()
+    public string GetCurrentLocation()
     {
         return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
     }
@@ -128,6 +135,9 @@ public class PlayerData
     public string username;
     public string id;
     public string location;
+    public float health;
+    public float attack;
+
 
     public PlayerData() { }
 
@@ -136,6 +146,8 @@ public class PlayerData
         username = name;
         this.id = id;
         location = "0, 0";
+        health = 100f;
+        attack = 1f;
     }
 
 

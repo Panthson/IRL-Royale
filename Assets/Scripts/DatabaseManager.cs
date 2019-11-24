@@ -27,14 +27,12 @@ public class DatabaseManager : MonoBehaviour
     private static DatabaseManager instance;
     private FirebaseAuth Authenticator;
 
-
     // PUBLIC VARIABLES
     public DatabaseReference Database;
     public Mapbox.Examples.LocationStatus loc;
     public bool initialized = false;
     public List<User> users;
     public User userRef;
-    public Image loading;
 
     private DataSnapshot usertree;
     private bool instantiateUsers = false;
@@ -56,7 +54,6 @@ public class DatabaseManager : MonoBehaviour
     // Start checks dependencies and runs InitializeFirebase()
     public void Start()
     {
-        loading.enabled = true;
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             var dependencyStatus = task.Result;
             if (dependencyStatus == DependencyStatus.Available)
@@ -81,8 +78,8 @@ public class DatabaseManager : MonoBehaviour
         }
         if (initialized)
         {
-            Database.Child(USERS).Child(LoginInfo.Uid).
-                Child(LOCATION).SetValueAsync(GetCurrentLocation());
+            Player.player = Database.Child(USERS).Child(LoginInfo.Uid);
+            Player.player.ValueChanged += Player.Instance.HandleHealthChanged;
         }
     }
 
@@ -160,30 +157,6 @@ public class DatabaseManager : MonoBehaviour
             });
     }
 
-    // Returns the String of latitude and longitude from mapbox
-    string GetCurrentLocation()
-    {
-        return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
-    }
-
-    /*
-    private IEnumerator GetSize() {
-        int totalChildren;
-        var task = Database.Child(USERS).GetValueAsync();
-        yield return new WaitUntil(() => task.IsCompleted || task.IsFaulted);
-        if (task.IsCompleted)
-            totalChildren = (int)task.Result.ChildrenCount;
-        else if (task.IsFaulted)
-            Debug.Log("Task Failed");
-
-        totalChildren = (int)task.Result.ChildrenCount;
-        string playerNum = totalChildren.ToString();
-        Debug.Log("User Count: " + playerNum);
-        
-        initialized = true;
-        loading.enabled = false;
-    }*/
-
     public async void GetUsers()
     {
         DataSnapshot snapshot = null;
@@ -207,8 +180,6 @@ public class DatabaseManager : MonoBehaviour
             usertree = snapshot;
             instantiateUsers = true;
         }
-
-
     }
 
     public void InstantiateUsers()
