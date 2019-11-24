@@ -2159,7 +2159,6 @@ MonoBehaviour:
   initialized: 0
   users: []
   userRef: {fileID: 7388848826877400155, guid: 7ad466886917073439d177b3586cb9c8, type: 3}
-  loading: {fileID: 0}
 --- !u!1 &1541670582
 GameObject:
   m_ObjectHideFlags: 0
@@ -2823,9 +2822,10 @@ GameObject:
   - component: {fileID: 114668954659405931}
   - component: {fileID: 1249928610}
   - component: {fileID: 1065619831072806}
+  - component: {fileID: 1065619831072807}
   m_Layer: 0
-  m_Name: PlayerTarget
-  m_TagString: Untagged
+  m_Name: Player
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2842,14 +2842,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66920ca86651bd43b1c6860e73fd348, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  username: 
-  id: 
-  location: 
   loc: {fileID: 1249928610}
-  Attack: 0
-  Defense: 0
+  attack: 5
   range: {fileID: 5943331571474925643}
   HealthBar: {fileID: 515133191109612397}
+--- !u!54 &1065619831072807
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1065619831072805}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1080079479174049
 GameObject:
   m_ObjectHideFlags: 0

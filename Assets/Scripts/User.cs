@@ -13,31 +13,36 @@ public class User : MonoBehaviour
 
     public string username = null;
     public string id = null;
-    public string location = null;
-    public DatabaseReference db = null;
-    private bool initialized = false;
+    public DatabaseReference userData = null;
+    private IEnumerator locationLerp;
 
     public void InitializeUser(string username, string id, string location, 
-        DatabaseReference db)
+        DatabaseReference userData)
     {
         this.username = username;
         this.id = id;
-        this.db = db;
-        this.db.ValueChanged += HandleLocationChanged;
-        SetLocation(location);
-        initialized = true;
+        this.userData = userData;
+        this.userData.ValueChanged += HandleLocationChanged;
+        locationLerp = SetLocation(location);
+        StartCoroutine(locationLerp);
     }
 
-    public void SetLocation(string location)
+    public IEnumerator SetLocation(string location)
     {
         string[] loc = location.Split(SEPARATOR, 2, 
             System.StringSplitOptions.None);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
-        transform.localPosition = LocationProviderFactory.Instance.mapManager.
+        Vector3 newPosition = LocationProviderFactory.Instance.mapManager.
             GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
+        while (transform.localPosition != newPosition)
+        {
+            transform.localPosition = Vector3.Lerp(transform.localPosition, newPosition, Time.deltaTime);
+            yield return new WaitForEndOfFrame();
+        }
     }
 
+    // Handles Change in location of this user in the database
     void HandleLocationChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
@@ -47,13 +52,16 @@ public class User : MonoBehaviour
         }
         // Do something with the data in args.Snapshot
 
-        location = args.Snapshot.Child(LOCATION).Value.ToString();
+        string location = args.Snapshot.Child(LOCATION).Value.ToString();
+        // Resets Coroutine
+        StopCoroutine(locationLerp);
+        locationLerp = SetLocation(location);
+        // Starts Coroutine to Move to location with new value
+        StartCoroutine(locationLerp);
     }
-    
-    // Update is called once per frame
-    void Update()
+
+    public void OnTriggerEnter(Collider other)
     {
-        if(initialized)
-            SetLocation(this.location);
+        Debug.Log("Triggered");
     }
 }
