@@ -16,7 +16,6 @@ public class Lobby : MonoBehaviour
     private const string TIMER = "timer";
 
     public int isActive;
-    public string location;
     public string lobbyName;
     public int playerNum;
     public List<User> players;
@@ -64,6 +63,7 @@ public class Lobby : MonoBehaviour
         this.timer = timer;
         this.db = db;
         this.db.ValueChanged += HandleIsActiveChanged;
+        this.db.ValueChanged += HandleLocationChanged;
         this.db.ValueChanged += HandlePlayersChanged;
         this.db.ValueChanged += HandleRadiusChanged;
         this.db.ValueChanged += HandleTimerChanged;
@@ -103,7 +103,20 @@ public class Lobby : MonoBehaviour
         isActive = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
     }
 
-    void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
+    void HandleLocationChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+
+        string location = args.Snapshot.Child(LOCATION).Value.ToString();
+        SetLocation(location);
+    }
+
+        void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
