@@ -148,7 +148,7 @@ public class DatabaseManager : MonoBehaviour
 
                 Database = FirebaseDatabase.DefaultInstance.RootReference;
 
-                Player data = new Player(ANONYMOUS_USERNAME, LoginInfo.Uid);
+                PlayerData data = new PlayerData(ANONYMOUS_USERNAME, LoginInfo.Uid);
 
                 string jsonData = JsonUtility.ToJson(data);
 

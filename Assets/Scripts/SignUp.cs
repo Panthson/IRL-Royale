@@ -9,9 +9,9 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
 
-public class AddUsers : MonoBehaviour
+public class SignUp : MonoBehaviour
 {
-    private Player data;
+    private PlayerData data;
     public InputField emailInput, passwordInput, confirmPasswordInput, username;
 
     private DatabaseReference databaseReference;
@@ -90,7 +90,7 @@ public class AddUsers : MonoBehaviour
                 newUser.DisplayName, newUser.UserId);
 
             //Update
-            data = new Player(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+            data = new PlayerData(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
 
             string jsonData = JsonUtility.ToJson(data);
             if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")
