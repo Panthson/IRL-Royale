@@ -11,8 +11,6 @@ public class User : MonoBehaviour
     private const string LOCATION = "location";
     private const string USERNAME = "username";
 
-    //public GameObject user;
-
     public string username = null;
     public string id = null;
     public string location = null;
