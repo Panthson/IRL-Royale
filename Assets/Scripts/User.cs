@@ -11,25 +11,11 @@ public class User : MonoBehaviour
     private const string LOCATION = "location";
     private const string USERNAME = "username";
 
-    //public GameObject user;
-
     public string username = null;
     public string id = null;
     public string location = null;
     public DatabaseReference db = null;
     private bool initialized = false;
-
-    //public string squadId;
-    //public string lobbyId;
-    //equipped weapon
-    //armor
-    //public float health;
-    //weapons array
-    //wins
-    //losses
-    //kills
-    //deaths
-    //icons
 
     public void InitializeUser(string username, string id, string location, 
         DatabaseReference db)
@@ -60,7 +46,6 @@ public class User : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
 
         location = args.Snapshot.Child(LOCATION).Value.ToString();
     }
