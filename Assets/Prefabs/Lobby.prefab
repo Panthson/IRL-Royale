@@ -44,9 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27cac87f166ffc948a2d961cafed3ab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isActive: 0
-  location: 
   lobbyName: 
+  isActive: 0
   playerNum: 0
   players: []
   radius: 0
@@ -159,5 +158,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b8568ccaf3d5f64b8df9a429809cedd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thisLobby: {fileID: 3201304614855451065}
   Circle: {fileID: 5559143551093962481}
   Collider: {fileID: 3703340763394384047}

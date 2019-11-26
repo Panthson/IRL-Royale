@@ -14,18 +14,17 @@ public class Lobby : MonoBehaviour
     private const string PLAYERS = "players";
     private const string RADIUS = "radius";
     private const string TIMER = "timer";
-
-    public int isActive;
     public string lobbyName;
+    public int isActive;
     public int playerNum;
     public List<User> players;
     public float radius;
     public int timer;
+    public bool currentLobby;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
-
     private IEnumerator resizeRadius;
-
+    private IEnumerator checkOpen;
     public float LobbyRange
     {
         get
@@ -38,35 +37,32 @@ public class Lobby : MonoBehaviour
 
         }
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     public void InitializeLobby(int isActive, string location, string lobbyName,
         int playerNum, string players, float radius, int timer, DatabaseReference db)
     {
-        this.isActive = isActive;
-        SetLocation(location);
-        this.lobbyName = lobbyName;
-        this.playerNum = playerNum;
-        this.radius = radius;
-        resizeRadius = SetRadiusSize(radius);
-        StartCoroutine(resizeRadius);
-        this.timer = timer;
+        // Pulls the Database Reference
         this.db = db;
+        // Sets the Name
+        this.lobbyName = lobbyName;
+        // Sets Active Game to In Progress
+        this.isActive = isActive;
+        // playerNum
+        this.playerNum = playerNum;
+        // Radius
+        this.radius = radius;
+        // Timer
+        this.timer = timer;
+        // Value Changed Listeners
         this.db.ValueChanged += HandleIsActiveChanged;
         this.db.ValueChanged += HandleLocationChanged;
         this.db.ValueChanged += HandlePlayersChanged;
         this.db.ValueChanged += HandleRadiusChanged;
         this.db.ValueChanged += HandleTimerChanged;
+
+        // Set Radius Size
+        resizeRadius = SetRadiusSize(radius);
+        StartCoroutine(resizeRadius);
     }
 
     public void SetLocation(string location)
@@ -75,8 +71,63 @@ public class Lobby : MonoBehaviour
             System.StringSplitOptions.None);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
-        transform.localPosition = LocationProviderFactory.Instance.mapManager.
+        if (Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x) > 0.001f ||
+            Mathf.Abs(longitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.y) > 0.001f)
+        {
+            //Debug.Log("Latitude: " + latitude + "\nLongitude: " + longitude);
+            // delete this lobby because it is out of range
+            DatabaseManager.Instance.lobbies.Remove(this);
+            Destroy(gameObject);
+            return;
+        }
+        Vector3 newPosition = LocationProviderFactory.Instance.mapManager.
             GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
+        Debug.Log(lobbyName + " Timer: " + timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);
+        if (Mathf.Abs(newPosition.x) > 2000 || Mathf.Abs(newPosition.z) > 2000)
+        {
+            // delete this lobby because it is out of range
+            DatabaseManager.Instance.lobbies.Remove(this);
+            Destroy(gameObject);
+            return;
+        }
+        else
+        {
+            transform.localPosition = newPosition;
+        }
+    }
+
+    public IEnumerator CheckOpen()
+    {
+        while (true)
+        {
+            yield return new WaitForEndOfFrame();
+            if ((!LobbyPanel.Instance.isOpen) && (Input.touchCount >= 1) && currentLobby)
+            {
+                LobbyPanel.Instance.Open();
+            }
+            else if (!currentLobby && LobbyPanel.Instance.isOpen)
+            {
+                if (LobbyPanel.Instance.lobbyPanel.blocksRaycasts)
+                {
+                    LobbyPanel.Instance.Close();
+                }
+            }yield return new WaitForEndOfFrame();
+        }
+    }
+
+    public void StartCheckOpen()
+    {
+        if (checkOpen != null)
+            StopCoroutine(checkOpen);
+        checkOpen = CheckOpen();
+        StartCoroutine(checkOpen);
+    }
+
+    public void SetLobbyPanel()
+    {
+        LobbyPanel.Instance.InitializeLobby(this);
+        currentLobby = true;
+        StartCheckOpen();
     }
 
     void HandleIsActiveChanged(object sender, ValueChangedEventArgs args)
@@ -87,8 +138,8 @@ public class Lobby : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
-        isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
+        if (this)
+            isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
     }
 
     void HandlePlayerNumChanged(object sender, ValueChangedEventArgs args)
@@ -99,8 +150,8 @@ public class Lobby : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
-        isActive = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
+        if (this)
+            playerNum = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
     }
 
     void HandleLocationChanged(object sender, ValueChangedEventArgs args)
@@ -113,10 +164,11 @@ public class Lobby : MonoBehaviour
         // Do something with the data in args.Snapshot
 
         string location = args.Snapshot.Child(LOCATION).Value.ToString();
-        SetLocation(location);
+        if (this)
+            SetLocation(location);
     }
 
-        void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
+    void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -126,6 +178,10 @@ public class Lobby : MonoBehaviour
         // Do something with the data in args.Snapshot
 
         // loop and parse
+        if (this)
+        {
+
+        }
     }
 
     void HandleRadiusChanged(object sender, ValueChangedEventArgs args)
@@ -136,11 +192,13 @@ public class Lobby : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
-        radius = float.Parse(args.Snapshot.Child(RADIUS).Value.ToString());
-        StopCoroutine(resizeRadius);
-        resizeRadius = SetRadiusSize(radius);
-        StartCoroutine(resizeRadius);
+        if (this)
+        {
+            radius = float.Parse(args.Snapshot.Child(RADIUS).Value.ToString());
+            StopCoroutine(resizeRadius);
+            resizeRadius = SetRadiusSize(radius);
+            StartCoroutine(resizeRadius);
+        }
     }
 
     void HandleTimerChanged(object sender, ValueChangedEventArgs args)
@@ -151,8 +209,8 @@ public class Lobby : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
-        timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
+        if (this)
+            timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
     }
 
     public IEnumerator SetRadiusSize(float radius)
@@ -162,5 +220,26 @@ public class Lobby : MonoBehaviour
             LobbyRange = Mathf.Lerp(LobbyRange, radius, Time.deltaTime * 1);
             yield return new WaitForEndOfFrame();
         }
+    }
+
+    public void OnApplicationPause(bool paused)
+    {
+        if (paused)
+        {
+            db.ValueChanged -= HandleIsActiveChanged;
+            db.ValueChanged -= HandleLocationChanged;
+            db.ValueChanged -= HandlePlayersChanged;
+            db.ValueChanged -= HandleRadiusChanged;
+            db.ValueChanged -= HandleTimerChanged;
+        }
+    }
+
+    public void OnApplicationQuit()
+    {
+        db.ValueChanged -= HandleIsActiveChanged;
+        db.ValueChanged -= HandleLocationChanged;
+        db.ValueChanged -= HandlePlayersChanged;
+        db.ValueChanged -= HandleRadiusChanged;
+        db.ValueChanged -= HandleTimerChanged;
     }
 }

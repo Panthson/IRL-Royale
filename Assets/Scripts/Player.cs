@@ -7,17 +7,30 @@ using System;
 
 public class Player : MonoBehaviour
 {
+    private const string USERS = "users";
     private const string LOCATION = "location";
     private const string HEALTH = "health";
     private const string ATTACK = "attack";
-
-    public static PlayerData playerData;
-    public Mapbox.Examples.LocationStatus loc;
-    private float health;
+    private Mapbox.Examples.LocationStatus loc;
+    public string userName;
+    public string id;
+    public float health;
     public float attack = 5f;
-    public Range range;
-    public Image HealthBar;
+    private Range range;
+    private Image HealthBar;
     public static DatabaseReference player;
+
+    public Mapbox.Examples.LocationStatus Loc
+    {
+        get
+        {
+            if (loc == null)
+            {
+                loc = GetComponent<Mapbox.Examples.LocationStatus>();
+            }
+            return loc;
+        }
+    }
 
     private static Player instance;
     public static Player Instance
@@ -60,10 +73,18 @@ public class Player : MonoBehaviour
     {
         get
         {
+            if (range == null)
+            {
+                range = FindObjectOfType<Range>();
+            }
             return range.transform.localScale.x;
         }
         set
         {
+            if (range == null)
+            {
+                range = FindObjectOfType<Range>();
+            }
             range.transform.localScale = new Vector3(value, value, 1f);
 
         }
@@ -71,6 +92,10 @@ public class Player : MonoBehaviour
 
     public IEnumerator SetHealthBar(float health)
     {
+        if (HealthBar == null)
+        {
+            HealthBar = DatabaseManager.Instance.healthBar;
+        }
         while (HealthBar.fillAmount != health)
         {
             if (HealthBar.fillAmount > .01f)
@@ -100,6 +125,15 @@ public class Player : MonoBehaviour
         }
     }
 
+    public static void SetDatabaseReference (DatabaseReference reference)
+    {
+        if (player == null)
+        {
+            player = reference;
+            player.ValueChanged += Instance.HandleHealthChanged;
+        }
+    }
+
     public void HandleHealthChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
@@ -109,8 +143,8 @@ public class Player : MonoBehaviour
         }
         // Do something with the data in args.Snapshot
 
-
-        Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
+        if (this)
+            Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
     }
 
     // Update is called once per frame
@@ -122,34 +156,31 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void SetPlayer(string userName, string id)
+    {
+        this.userName = userName;
+        this.id = id;
+    }
+
     // Returns the String of latitude and longitude from mapbox
     public string GetCurrentLocation()
     {
-        return loc.currLoc.LatitudeLongitude.x + ", " + loc.currLoc.LatitudeLongitude.y;
+        return Loc.currLoc.LatitudeLongitude.x + ", " + Loc.currLoc.LatitudeLongitude.y;
     }
-}
 
-[Serializable]
-public class PlayerData
-{
-    public string username;
-    public string id;
-    public string location;
-    public float health;
-    public float attack;
-
-
-    public PlayerData() { }
-
-    public PlayerData(string name, string id)
+    public void OnApplicationPause(bool paused)
     {
-        username = name;
-        this.id = id;
-        location = "0, 0";
-        health = 100f;
-        attack = 1f;
+        if (paused)
+            player.ValueChanged -= HandleHealthChanged;
+        else
+        {
+            DatabaseManager.Instance.AddPlayer(userName, id);
+        }
     }
 
-
-
+    /*public void OnApplicationQuit()
+    {
+        if (this)
+            player.ValueChanged -= HandleHealthChanged;
+    }*/
 }

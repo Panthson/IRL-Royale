@@ -9,9 +9,9 @@ public class User : MonoBehaviour
     private readonly static string[] SEPARATOR = { ", ", "\n" };
     private const string ID = "id";
     private const string LOCATION = "location";
-    private const string USERNAME = "username";
+    private const string USERNAME = "userName";
 
-    public string username = null;
+    public string userName = null;
     public string id = null;
     public DatabaseReference userData = null;
     private IEnumerator locationLerp;
@@ -19,7 +19,7 @@ public class User : MonoBehaviour
     public void InitializeUser(string username, string id, string location, 
         DatabaseReference userData)
     {
-        this.username = username;
+        userName = username;
         this.id = id;
         this.userData = userData;
         this.userData.ValueChanged += HandleLocationChanged;
@@ -51,17 +51,32 @@ public class User : MonoBehaviour
             return;
         }
         // Do something with the data in args.Snapshot
-
-        string location = args.Snapshot.Child(LOCATION).Value.ToString();
-        // Resets Coroutine
-        StopCoroutine(locationLerp);
-        locationLerp = SetLocation(location);
-        // Starts Coroutine to Move to location with new value
-        StartCoroutine(locationLerp);
+        if (this)
+        {
+            string location = args.Snapshot.Child(LOCATION).Value.ToString();
+            // Resets Coroutine
+            StopCoroutine(locationLerp);
+            locationLerp = SetLocation(location);
+            // Starts Coroutine to Move to location with new value
+            StartCoroutine(locationLerp);
+        }
     }
 
     public void OnTriggerEnter(Collider other)
     {
         Debug.Log("Triggered");
+    }
+
+    public void OnApplicationPause(bool paused)
+    {
+        if (paused)
+        {
+            userData.ValueChanged -= HandleLocationChanged;
+        }
+    }
+
+    public void OnApplicationQuit()
+    {
+        userData.ValueChanged -= HandleLocationChanged;
     }
 }

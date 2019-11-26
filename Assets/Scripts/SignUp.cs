@@ -11,7 +11,6 @@ using System;
 
 public class SignUp : MonoBehaviour
 {
-    private PlayerData data;
     public InputField emailInput, passwordInput, confirmPasswordInput, username;
 
     private DatabaseReference databaseReference;
@@ -90,16 +89,17 @@ public class SignUp : MonoBehaviour
                 newUser.DisplayName, newUser.UserId);
 
             //Update
-            data = new PlayerData(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+            DatabaseManager.Instance.AddPlayer(newUser.DisplayName, newUser.UserId);
+            //Player.Instance.SetPlayer(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId, databaseReference.Child("users"));
 
-            string jsonData = JsonUtility.ToJson(data);
+            /*string jsonData = JsonUtility.ToJson(Player.Instance);
             if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")
             {
                 print("user id: " + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
                 databaseReference.Child("users").Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
                   SetRawJsonValueAsync(jsonData);
                 is_SignUp = true;
-            }
+            }*/
         }));
 
     }
