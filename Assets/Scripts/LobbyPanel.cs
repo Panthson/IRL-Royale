@@ -6,6 +6,10 @@ using UnityEngine.UI;
 public class LobbyPanel : MonoBehaviour
 {
     public CanvasGroup lobbyPanel;
+    public Text lobbyName;
+    public Button openButton;
+    public Text openText;
+    public Lobby lobby;
     public bool isOpen = false;
 
     private static LobbyPanel instance;
@@ -20,8 +24,7 @@ public class LobbyPanel : MonoBehaviour
         }
     }
 
-    public Text lobbyName;
-    public Lobby lobby;
+    
 
     public void InitializeLobby(Lobby lobby)
     {

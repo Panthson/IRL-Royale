@@ -18,7 +18,7 @@ public class DatabaseManager : MonoBehaviour
     private const string LOBBIES = "lobbies";
     private const string ID = "id";
     private const string LOCATION = "location";
-    private const string USERNAME = "userName";
+    private const string USERNAME = "username";
     private const string USERS = "users";
     private const string ROOT = "";
     private string ANONYMOUS_USERNAME = "anonymous";
@@ -35,20 +35,17 @@ public class DatabaseManager : MonoBehaviour
     // PRIVATE VARIABLES
     private static DatabaseManager instance;
     private FirebaseAuth Authenticator;
-    private DataSnapshot userTree;
-    private DataSnapshot lobbyTree;
-    private bool getUsers = false;
-    private bool getLobbies = false;
 
     // PUBLIC VARIABLES
+    public bool initialized;
     public DatabaseReference Database;
-    public bool initialized = false;
     public List<User> users;
     public User userRef;
     public List<Lobby> lobbies;
     public Lobby lobbyRef;
     public Image healthBar;
     public CanvasGroup loadingScreen;
+    public Text loadingText;
 
     // Gives a reference of DatabaseManager using DatabaseManager.Instance
     public static DatabaseManager Instance
@@ -63,13 +60,15 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
+    // Start Loading Screen
     public void StartLoad()
     {
         if (loadingScreen.blocksRaycasts) return;
         loadingScreen.alpha = 1;
         loadingScreen.blocksRaycasts = true;
     }
-
+    
+    // End Loading Screen
     public void EndLoad()
     {
         if (!loadingScreen.blocksRaycasts) return;
@@ -77,184 +76,65 @@ public class DatabaseManager : MonoBehaviour
         loadingScreen.blocksRaycasts = false;
     }
 
-    // Start checks dependencies and runs InitializeFirebase()
+    // // Initializes the Database and Authenticator
     public async void Start()
     {
         StartLoad();
-        await FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
-            var dependencyStatus = task.Result;
-            if (dependencyStatus == DependencyStatus.Available)
-            {
-                
-            }
-            else
-            {
-                Debug.LogError(
-                  "Could not resolve all Firebase dependencies: " + dependencyStatus);
-            }
-        });
-        InitializeFirebase();
-        StartCoroutine(CreateLobbies());
-    }
-
-    // Creates Lobby Objects after Firebase has initialized
-    public IEnumerator CreateLobbies()
-    {
-
-        while (!initialized)
-        {
-            yield return new WaitForSeconds(1);
-        }
-        GetLobbies();
-        while (!getLobbies)
-        {
-            yield return new WaitForEndOfFrame();
-        }
-        InstantiateLobbies();
-        EndLoad();
-    }
-
-    // Initializes the Database and Authenticator
-    // When initialized is true, this function has finished running.
-    private void InitializeFirebase()
-    {
-        Debug.Log("Initializing Firebase");
+        // Checking Dependencies
+        var dependencystatus = await FirebaseApp.CheckAndFixDependenciesAsync();
+        //Debug.Log("Initializing Firebase");
+        loadingText.text = "Initializing Firebase...";
         FirebaseApp app = FirebaseApp.DefaultInstance;
-        // db link
+        // Link to Database
         app.SetEditorDatabaseUrl("https://iroyale-1571440677136.firebaseio.com/");
         if (app.Options.DatabaseUrl != null)
             app.SetEditorDatabaseUrl(app.Options.DatabaseUrl);
         // user authentication
         Authenticator = FirebaseAuth.DefaultInstance;
+        Database = FirebaseDatabase.DefaultInstance.RootReference;
         if (!LoginInfo.IsGuest)
-            Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email,
-                LoginInfo.Password).ContinueWith(task => {
-                    if (task.IsCanceled)
-                    {
-                        Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
-                        return;
-                    }
-                    if (task.IsFaulted)
-                    {
-                        Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                        return;
-                    }
-
-                    Firebase.Auth.FirebaseUser newUser = task.Result;
-                    Debug.LogFormat("User signed in successfully: {0} ({1})",
-                        newUser.DisplayName, newUser.UserId);
-
-                    Database = FirebaseDatabase.DefaultInstance.RootReference;
-
-                    //Getting client id for FB using device id
-                    initialized = true;
-                    AddPlayer(newUser.DisplayName, LoginInfo.Uid);
-                });
+        {
+            FirebaseUser firebaseUser = await Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email, LoginInfo.Password);
+            LoginInfo.Uid = firebaseUser.UserId;
+        }
         else
-            FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith(task =>
-            {
-                if (task.IsCanceled)
-                {
-                    Firebase.FirebaseException e =
-                  task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                    return;
-                }
-                if (task.IsFaulted)
-                {
-
-                    Firebase.FirebaseException e =
-                    task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-                    return;
-                }
-
-                Firebase.Auth.FirebaseUser newUser = task.Result;
-                Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                    newUser.DisplayName, newUser.UserId);
-
-                Database = FirebaseDatabase.DefaultInstance.RootReference;
-
-                initialized = true;
-                AddPlayer(ANONYMOUS_USERNAME, LoginInfo.Uid);
-            });
+        {
+            FirebaseUser firebaseUser = await FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync();
+            LoginInfo.Uid = firebaseUser.UserId;
+            LoginInfo.Username = ANONYMOUS_USERNAME;
+        }
+        loadingText.text = "Awaiting Player...";
+        await SetPlayer(LoginInfo.Uid);
+        EndLoad();
+        initialized = true;
+        GetLobbies();
     }
 
     // Adds Current Player to Database if initialized
-    public async void AddPlayer(string userName, string id)
+    public async Task SetPlayer(string id)
     {
-        if (initialized)
+        Player.SetDatabaseReference(Database.Child(USERS).Child(id));
+        DataSnapshot player = await Database.Child(USERS).Child(id).GetValueAsync();
+        if (LoginInfo.IsGuest)
         {
-            Player.Instance.SetPlayer(userName, id);
-            Player.SetDatabaseReference(Database.Child(USERS).Child(id));
-
+            Player.Instance.username = ANONYMOUS_USERNAME;
             string jsonData = JsonUtility.ToJson(Player.Instance);
-
-            await Database.Child("users").Child(LoginInfo.Uid).
-                  SetRawJsonValueAsync(jsonData).ContinueWith(task2 =>
-                  {
-
-                  });
+            await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
+        }
+        else
+        {
+            Player.Instance.username = player.Child(USERNAME).Value.ToString();
+            string jsonData = JsonUtility.ToJson(Player.Instance);
+            await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
         }
     }
 
     // Gets Users from Lobby
     public async void GetUsers(string lobbyKey)
     {
-        DataSnapshot snapshot = null;
+        DeleteAllUsers();
         Debug.Log("Getting Users");
-
-        await Database.Child(LOBBIES).Child(lobbyKey).GetValueAsync().ContinueWith(task => {
-            if (task.IsFaulted)
-            {
-                // Handle the error...
-                Debug.LogError("Task Failed");
-            }
-            else if (task.IsCompleted)
-            {
-                snapshot = task.Result;
-
-            }
-        });
-
-        if (snapshot != null)
-        {
-            userTree = snapshot;
-            getUsers = true;
-        }
-    }
-
-    // Gets Lobbies from Database
-    public async void GetLobbies()
-    {
-        DataSnapshot snapshot = null;
-        Debug.Log("Getting Lobbies");
-
-        await Database.Child(LOBBIES).GetValueAsync().ContinueWith(task => {
-            if (task.IsFaulted)
-            {
-                // Handle the error...
-                Debug.LogError("Task Failed");
-            }
-            else if (task.IsCompleted)
-            {
-                snapshot = task.Result;
-
-            }
-        });
-
-        if (snapshot != null)
-        {
-            lobbyTree = snapshot;
-            getLobbies = true;
-        }
-    }
-
-    // Instantiates the User Objects in each Lobby
-    // TODO
-    // Currently it instantiates them in the scene on Start
-    // Change this to be right before a match starts
-    public void InstantiateUsers()
-    {
-        Debug.Log("Instantiating Users");
+        DataSnapshot userTree = await Database.Child(LOBBIES).Child(lobbyKey).GetValueAsync();
         foreach (DataSnapshot user in userTree.Children)
         {
             if (user.Key.Equals(LoginInfo.Uid))
@@ -270,10 +150,15 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    // Instantiates the Lobby Objects in the scene saved in List<Lobby> lobbies
-    public void InstantiateLobbies()
+    // Gets Lobbies from Database
+    public async void GetLobbies()
     {
-        //Debug.Log("Instantiating Lobbies");
+        StartLoad();
+        loadingText.text = "Getting Lobbies...";
+        DeleteAllLobbies();
+        Debug.Log("Getting Lobbies");
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        DataSnapshot lobbyTree = await Database.Child(LOBBIES).GetValueAsync();
         foreach (DataSnapshot lobby in lobbyTree.Children)
         {
             if (lobby.Child(LOBBYNAME).Value.ToString() != null)
@@ -290,20 +175,34 @@ public class DatabaseManager : MonoBehaviour
                 l.lobbyRange.enabled = true;
                 Debug.Log(l.lobbyName);
             }
-            
+
         }
+        EndLoad();
     }
 
+    // Deletes all Users
     public void DeleteAllUsers()
     {
+        if (users.Count == 0) return;
         foreach(User user in users)
         {
-            users.Remove(user);
             Destroy(user.gameObject);
         }
+        users.Clear();
     }
 
-    // on application quit, delete player from database
+    // Deletes all Lobbies
+    public void DeleteAllLobbies()
+    {
+        if (lobbies.Count == 0) return;
+        foreach (Lobby lobby in lobbies)
+        {
+            Destroy(lobby.gameObject);
+        }
+        lobbies.Clear();
+    }
+
+    // on application quit, delete player from database if guest
     void OnApplicationPause(bool paused)
     {
         if (paused)
@@ -313,17 +212,8 @@ public class DatabaseManager : MonoBehaviour
                 if (LoginInfo.IsGuest)
                     Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
             }
-            if (Authenticator != null)
-            {
-                Authenticator.SignOut();
-            }
-        }
-        else
-        {
-
         }
     }
-
     
     void OnApplicationQuit()
     {
@@ -331,10 +221,6 @@ public class DatabaseManager : MonoBehaviour
         {
             if (LoginInfo.IsGuest)
                 Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
-        }
-        if (Authenticator != null)
-        {
-            Authenticator.SignOut();
         }
     }
 }

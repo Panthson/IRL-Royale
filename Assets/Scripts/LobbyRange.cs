@@ -1,35 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class LobbyRange : MonoBehaviour
 {
     public Lobby thisLobby;
-    public SpriteRenderer Circle;
-
-    public SphereCollider Collider;
-
-    public void OnTriggerEnter(Collider other)
+    public async void OnTriggerEnter(Collider other)
     {
+        while (!thisLobby.locationSet)
+        {
+            await Task.Delay(100);
+        }
         if (other.CompareTag("Player"))
         {
-            StopAllCoroutines();
-            StartCoroutine(SetCurrentLobby());
-        }
-    }
-
-    public IEnumerator SetCurrentLobby()
-    {
-        yield return new WaitUntil(() => DatabaseManager.Instance.initialized);
-        thisLobby.SetLobbyPanel();
-    }
-
-    public IEnumerator RemoveCurrentLobby()
-    {
-        yield return new WaitUntil(() => DatabaseManager.Instance.initialized);
-        if (thisLobby.currentLobby == true)
-        {
-            thisLobby.currentLobby = false;
+            thisLobby.SetLobbyPanel();
         }
     }
 
@@ -37,8 +22,7 @@ public class LobbyRange : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            StopAllCoroutines();
-            StartCoroutine(RemoveCurrentLobby());
+            thisLobby.RemoveLobbyPanel();
         }
         
     }

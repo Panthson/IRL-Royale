@@ -6,6 +6,7 @@ public static class LoginInfo
 {
     private static string email = "test@gmail.com";
     private static string password = "testtest";
+    private static string username = "test";
     private static string uid = "1QhRyxGhfYNG6YHY0IfQL5xLhNz2";
     private static bool isGuest = false;
 
@@ -42,7 +43,17 @@ public static class LoginInfo
             uid = value;
         }
     }
-
+    public static string Username
+    {
+        get
+        {
+            return username;
+        }
+        set
+        {
+            username = value;
+        }
+    }
     public static bool IsGuest
     {
         get

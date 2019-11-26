@@ -57,14 +57,14 @@ public class SignUp : MonoBehaviour
         Register(emailInput.text, passwordInput.text, username.text);
     }
 
-    public void Register(string emailInput, string passwordInput, string username)
+    public async void Register(string emailInput, string passwordInput, string username)
     {
         if (emailInput.Equals("") && passwordInput.Equals("") && username.Equals(""))
         {
             return;
         }
-
-        FirebaseAuth.DefaultInstance.CreateUserWithEmailAndPasswordAsync(emailInput, 
+        string id = "";
+        await FirebaseAuth.DefaultInstance.CreateUserWithEmailAndPasswordAsync(emailInput, 
             passwordInput).ContinueWith((task =>
         {
             if (task.IsCanceled)
@@ -85,23 +85,16 @@ public class SignUp : MonoBehaviour
             }
             // Firebase user has been created.
             Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
-
-            //Update
-            DatabaseManager.Instance.AddPlayer(newUser.DisplayName, newUser.UserId);
-            //Player.Instance.SetPlayer(this.username.text, FirebaseAuth.DefaultInstance.CurrentUser.UserId, databaseReference.Child("users"));
-
-            /*string jsonData = JsonUtility.ToJson(Player.Instance);
-            if (FirebaseAuth.DefaultInstance.CurrentUser != null && FirebaseAuth.DefaultInstance.CurrentUser.Email != "")
-            {
-                print("user id: " + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
-                databaseReference.Child("users").Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).
-                  SetRawJsonValueAsync(jsonData);
-                is_SignUp = true;
-            }*/
+            id = newUser.UserId;
         }));
+        CreateNewUser(id);
+    }
 
+    async void CreateNewUser(string id)
+    {
+        DatabaseReference newUser = databaseReference.Child("users").Child(id);
+        await newUser.Child("username").SetValueAsync(username);
+        await newUser.Child("id").SetValueAsync(id);
     }
 
     void GetErrorMessage(AuthError errorCode)

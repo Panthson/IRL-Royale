@@ -12,13 +12,12 @@ public class Player : MonoBehaviour
     private const string HEALTH = "health";
     private const string ATTACK = "attack";
     private Mapbox.Examples.LocationStatus loc;
-    public string userName;
-    public string id;
-    public float health;
+    public string username;
+    public float health = 100f;
     public float attack = 5f;
     private Range range;
     private Image HealthBar;
-    public static DatabaseReference player;
+    public static DatabaseReference db;
 
     public Mapbox.Examples.LocationStatus Loc
     {
@@ -127,10 +126,10 @@ public class Player : MonoBehaviour
 
     public static void SetDatabaseReference (DatabaseReference reference)
     {
-        if (player == null)
+        if (db == null)
         {
-            player = reference;
-            player.ValueChanged += Instance.HandleHealthChanged;
+            db = reference;
+            db.ValueChanged += Instance.HandleHealthChanged;
         }
     }
 
@@ -150,31 +149,24 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (player != null)
-        {
-            player.Child(LOCATION).SetValueAsync(GetCurrentLocation());
-        }
-    }
-
-    public void SetPlayer(string userName, string id)
-    {
-        this.userName = userName;
-        this.id = id;
+        SetLocation();
     }
 
     // Returns the String of latitude and longitude from mapbox
-    public string GetCurrentLocation()
+    public async void SetLocation()
     {
-        return Loc.currLoc.LatitudeLongitude.x + ", " + Loc.currLoc.LatitudeLongitude.y;
+        if (db == null) return;
+        string location = Loc.currLoc.LatitudeLongitude.x + ", " + Loc.currLoc.LatitudeLongitude.y;
+        await db.Child(LOCATION).SetValueAsync(location);
     }
 
     public void OnApplicationPause(bool paused)
     {
         if (paused)
-            player.ValueChanged -= HandleHealthChanged;
+            db.ValueChanged -= HandleHealthChanged;
         else
         {
-            DatabaseManager.Instance.AddPlayer(userName, id);
+
         }
     }
 

@@ -20,6 +20,7 @@ public class Lobby : MonoBehaviour
     public List<User> players;
     public float radius;
     public int timer;
+    public bool locationSet = false;
     public bool currentLobby;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
@@ -59,7 +60,6 @@ public class Lobby : MonoBehaviour
         this.db.ValueChanged += HandlePlayersChanged;
         this.db.ValueChanged += HandleRadiusChanged;
         this.db.ValueChanged += HandleTimerChanged;
-
         // Set Radius Size
         resizeRadius = SetRadiusSize(radius);
         StartCoroutine(resizeRadius);
@@ -93,41 +93,28 @@ public class Lobby : MonoBehaviour
         else
         {
             transform.localPosition = newPosition;
+            locationSet = true;
         }
-    }
-
-    public IEnumerator CheckOpen()
-    {
-        while (true)
-        {
-            yield return new WaitForEndOfFrame();
-            if ((!LobbyPanel.Instance.isOpen) && (Input.touchCount >= 1) && currentLobby)
-            {
-                LobbyPanel.Instance.Open();
-            }
-            else if (!currentLobby && LobbyPanel.Instance.isOpen)
-            {
-                if (LobbyPanel.Instance.lobbyPanel.blocksRaycasts)
-                {
-                    LobbyPanel.Instance.Close();
-                }
-            }yield return new WaitForEndOfFrame();
-        }
-    }
-
-    public void StartCheckOpen()
-    {
-        if (checkOpen != null)
-            StopCoroutine(checkOpen);
-        checkOpen = CheckOpen();
-        StartCoroutine(checkOpen);
     }
 
     public void SetLobbyPanel()
     {
         LobbyPanel.Instance.InitializeLobby(this);
         currentLobby = true;
-        StartCheckOpen();
+        LobbyPanel.Instance.openText.text = "Open: " + lobbyName;
+        LobbyPanel.Instance.openButton.gameObject.SetActive(true);
+    }
+
+    public void RemoveLobbyPanel()
+    {
+        if (currentLobby)
+        {
+            LobbyPanel.Instance.lobby = null;
+            currentLobby = false;
+            LobbyPanel.Instance.openText.text = "Open: Nothing";
+            LobbyPanel.Instance.Close();
+            LobbyPanel.Instance.openButton.gameObject.SetActive(false);
+        }
     }
 
     void HandleIsActiveChanged(object sender, ValueChangedEventArgs args)
