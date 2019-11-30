@@ -10,11 +10,14 @@ public class Lobby : MonoBehaviour
     private readonly static string[] SEPARATOR = { ", ", "\n" };
     private const string LOCATION = "location";
     private const string ISACTIVE = "isActive";
+    private const string INPROGRESS = "inProgress";
     private const string PLAYERNUM = "playerNum";
     private const string PLAYERS = "players";
     private const string RADIUS = "radius";
     private const string TIMER = "timer";
+    public string lobbyId;
     public string lobbyName;
+    public int inProgress;
     public int isActive;
     public int playerNum;
     public List<User> players;
@@ -39,15 +42,20 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    public void InitializeLobby(int isActive, string location, string lobbyName,
-        int playerNum, string players, float radius, int timer, DatabaseReference db)
+    public void InitializeLobby(string lobbyId, int isActive, int inProgress, string location, 
+        string lobbyName, int playerNum, float radius, int timer, 
+        DatabaseReference db)
     {
+        // Gets the lobby ID
+        this.lobbyId = lobbyId;
         // Pulls the Database Reference
         this.db = db;
         // Sets the Name
         this.lobbyName = lobbyName;
-        // Sets Active Game to In Progress
+        // Sets Lobby to Active
         this.isActive = isActive;
+        // Sets Game in Progress
+        this.inProgress = inProgress;
         // playerNum
         this.playerNum = playerNum;
         // Radius
@@ -56,6 +64,7 @@ public class Lobby : MonoBehaviour
         this.timer = timer;
         // Value Changed Listeners
         this.db.ValueChanged += HandleIsActiveChanged;
+        this.db.ValueChanged += HandleInProgressChanged;
         this.db.ValueChanged += HandleLocationChanged;
         this.db.ValueChanged += HandlePlayersChanged;
         this.db.ValueChanged += HandleRadiusChanged;
@@ -127,6 +136,17 @@ public class Lobby : MonoBehaviour
         // Do something with the data in args.Snapshot
         if (this)
             isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
+    }
+    void HandleInProgressChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+        if (this)
+            inProgress = Int32.Parse(args.Snapshot.Child(INPROGRESS).Value.ToString());
     }
 
     void HandlePlayerNumChanged(object sender, ValueChangedEventArgs args)
@@ -214,6 +234,7 @@ public class Lobby : MonoBehaviour
         if (paused)
         {
             db.ValueChanged -= HandleIsActiveChanged;
+            db.ValueChanged -= HandleInProgressChanged;
             db.ValueChanged -= HandleLocationChanged;
             db.ValueChanged -= HandlePlayersChanged;
             db.ValueChanged -= HandleRadiusChanged;
@@ -224,6 +245,7 @@ public class Lobby : MonoBehaviour
     public void OnApplicationQuit()
     {
         db.ValueChanged -= HandleIsActiveChanged;
+        db.ValueChanged -= HandleInProgressChanged;
         db.ValueChanged -= HandleLocationChanged;
         db.ValueChanged -= HandlePlayersChanged;
         db.ValueChanged -= HandleRadiusChanged;

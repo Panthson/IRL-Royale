@@ -13,15 +13,17 @@ public class User : MonoBehaviour
 
     public string userName = null;
     public string id = null;
+    public string lobby = null;
     public DatabaseReference userData = null;
     private IEnumerator locationLerp;
 
     public void InitializeUser(string username, string id, string location, 
-        DatabaseReference userData)
+        string lobby, DatabaseReference userData)
     {
         userName = username;
         this.id = id;
         this.userData = userData;
+        this.lobby = lobby;
         this.userData.ValueChanged += HandleLocationChanged;
         locationLerp = SetLocation(location);
         StartCoroutine(locationLerp);

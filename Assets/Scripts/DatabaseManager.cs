@@ -20,10 +20,12 @@ public class DatabaseManager : MonoBehaviour
     private const string LOCATION = "location";
     private const string USERNAME = "username";
     private const string USERS = "users";
+    private const string LOBBY = "lobby";
     private const string ROOT = "";
     private string ANONYMOUS_USERNAME = "anonymous";
 
     private const string ISACTIVE = "isActive";
+    private const string INPROGRESS = "inProgress";
     private const string LOBBYNAME = "lobbyName";
     private const string PLAYERNUM = "playerNum";
     private const string PLAYERS = "players";
@@ -144,7 +146,7 @@ public class DatabaseManager : MonoBehaviour
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
                 u.InitializeUser(user.Child(USERNAME).Value.ToString(),
                     user.Child(ID).Value.ToString(), user.Child(LOCATION).Value.ToString(),
-                    Database.Child(USERS).Child(user.Key));
+                    user.Child(LOBBY).ToString(), Database.Child(USERS).Child(user.Key));
                 users.Add(u);
             }
         }
@@ -165,10 +167,11 @@ public class DatabaseManager : MonoBehaviour
             {
                 Lobby l = Instantiate(lobbyRef, Vector3.zero, Quaternion.identity, transform);
                 l.lobbyRange.enabled = false;
-                l.InitializeLobby(Int32.Parse(lobby.Child(ISACTIVE).Value.ToString()),
+                l.InitializeLobby(lobby.Key.ToString(), Int32.Parse(lobby.Child(ISACTIVE).Value.ToString()),
+                    Int32.Parse(lobby.Child(INPROGRESS).Value.ToString()),
                     lobby.Child(LOCATION).Value.ToString(), lobby.Child(LOBBYNAME).Value.ToString(),
                     Int32.Parse(lobby.Child(PLAYERNUM).Value.ToString()),
-                    lobby.Child(PLAYERS).Value.ToString(), float.Parse(lobby.Child(RADIUS).Value.ToString()),
+                    float.Parse(lobby.Child(RADIUS).Value.ToString()),
                     Int32.Parse(lobby.Child(TIMER).Value.ToString()), Database.Child(LOBBIES).Child(lobby.Key));
 
                 lobbies.Add(l);
