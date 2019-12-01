@@ -202,7 +202,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 308659183}
+      - m_Target: {fileID: 0}
         m_MethodName: GoToLogin
         m_Mode: 1
         m_Arguments:
@@ -474,26 +474,13 @@ GameObject:
   m_Component:
   - component: {fileID: 308659184}
   - component: {fileID: 308659185}
-  - component: {fileID: 308659183}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: SignUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &308659183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 308659182}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 871312637aa60914083cd820cdbc32a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &308659184
 Transform:
   m_ObjectHideFlags: 0
@@ -540,7 +527,7 @@ GameObject:
   - component: {fileID: 315625718}
   - component: {fileID: 315625717}
   m_Layer: 5
-  m_Name: Button
+  m_Name: GoBackButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -609,7 +596,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 308659183}
+      - m_Target: {fileID: 308659185}
         m_MethodName: GoToHome
         m_Mode: 1
         m_Arguments:
@@ -1614,7 +1601,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -2405,7 +2392,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 20, y: 221}
+  m_AnchoredPosition: {x: 20, y: -82}
   m_SizeDelta: {x: 967, y: 385.6}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1546287186

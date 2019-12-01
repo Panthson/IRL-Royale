@@ -57,6 +57,16 @@ public class SignUp : MonoBehaviour
         Register(emailInput.text, passwordInput.text, username.text);
     }
 
+    public void GoToHome()
+    {
+        SceneManager.LoadScene("Home");
+    }
+
+    public void GoToLogin()
+    {
+        SceneManager.LoadScene("Login");
+    }
+
     public async void Register(string emailInput, string passwordInput, string username)
     {
         if (emailInput.Equals("") && passwordInput.Equals("") && username.Equals(""))
@@ -93,8 +103,8 @@ public class SignUp : MonoBehaviour
     async void CreateNewUser(string id)
     {
         DatabaseReference newUser = databaseReference.Child("users").Child(id);
-        await newUser.Child("username").SetValueAsync(username);
-        await newUser.Child("id").SetValueAsync(id);
+        await newUser.Child("username").SetValueAsync(username.text);
+        GoToLogin();
     }
 
     void GetErrorMessage(AuthError errorCode)

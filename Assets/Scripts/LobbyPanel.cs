@@ -8,9 +8,11 @@ public class LobbyPanel : MonoBehaviour
     public CanvasGroup lobbyPanel;
     public Text lobbyName;
     public Button openButton;
-    public Text openText;
+    public Text usersList;
     public Text timerText;
     public Lobby lobby;
+    public Button joinButton;
+    public Button exitButton;
     public bool isOpen = false;
 
     private static LobbyPanel instance;
@@ -25,14 +27,26 @@ public class LobbyPanel : MonoBehaviour
         }
     }
 
-    
-
     public void InitializeLobby(Lobby lobby)
     {
         this.lobby = lobby;
         lobbyName.text = lobby.lobbyName;
+        usersList.text = lobby.Usernames;
     }
 
+    public async void JoinLobby()
+    {
+        await DatabaseManager.Instance.JoinLobby(lobby.lobbyId);
+        joinButton.gameObject.SetActive(false);
+        exitButton.gameObject.SetActive(true);
+    }
+
+    public async void ExitLobby()
+    {
+        await DatabaseManager.Instance.ExitLobby(lobby.lobbyId);
+        exitButton.gameObject.SetActive(true);
+        joinButton.gameObject.SetActive(false);
+    }
 
     public void Open()
     {

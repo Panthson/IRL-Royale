@@ -1,15 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using Mapbox;
 using Firebase;
 using Firebase.Database;
 using Firebase.Unity.Editor;
-using Firebase.Extensions;
 using Firebase.Auth;
+using Firebase.Functions;
 using UnityEngine.UI;
-using Mapbox.Unity.Location;
 using System;
 
 public class DatabaseManager : MonoBehaviour
@@ -39,6 +36,7 @@ public class DatabaseManager : MonoBehaviour
     // PRIVATE VARIABLES
     private static DatabaseManager instance;
     private FirebaseAuth Authenticator;
+    private FirebaseFunctions Functions;
 
     // PUBLIC VARIABLES
     public bool initialized;
@@ -96,6 +94,7 @@ public class DatabaseManager : MonoBehaviour
         // user authentication
         Authenticator = FirebaseAuth.DefaultInstance;
         Database = FirebaseDatabase.DefaultInstance.RootReference;
+        Functions = FirebaseFunctions.DefaultInstance;
         if (!LoginInfo.IsGuest)
         {
             FirebaseUser firebaseUser = await Authenticator.
@@ -191,6 +190,36 @@ public class DatabaseManager : MonoBehaviour
         }
         EndLoad();
     }
+    
+    public Task JoinLobby(string lobbyId)
+    {
+        var data = new Dictionary<string, object>();
+        data["playerId"] = LoginInfo.Uid;
+        data["username"] = LoginInfo.Username;
+        data["lobbyId"] = lobbyId;
+
+        var function = Functions.GetHttpsCallable("joinLobby");
+
+        return function.CallAsync(data).ContinueWith((task) =>
+        {
+            return task.Result.Data;
+        });
+    }
+
+    public Task ExitLobby(string lobbyId)
+    {
+        var data = new Dictionary<string, object>();
+        data["playerId"] = LoginInfo.Uid;
+        data["lobbyId"] = lobbyId;
+
+        var function = Functions.GetHttpsCallable("exitLobby");
+
+        return function.CallAsync(data).ContinueWith((task) =>
+        {
+            return task.Result.Data;
+        });
+    }
+
 
     // Deletes all Users
     public void DeleteAllUsers()

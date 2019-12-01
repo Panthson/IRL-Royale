@@ -6,6 +6,7 @@ using UnityEngine;
 public class LobbyRange : MonoBehaviour
 {
     public Lobby thisLobby;
+    public SpriteRenderer circle;
     public async void OnTriggerEnter(Collider other)
     {
         while (!thisLobby.locationSet)

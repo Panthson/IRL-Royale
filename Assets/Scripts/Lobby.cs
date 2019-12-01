@@ -21,11 +21,11 @@ public class Lobby : MonoBehaviour
     public int isActive;
     public int playerNum;
     public List<User> users;
-    public string usernames;
+    private string usernames;
     public float radius;
     private int timer;
     public bool locationSet = false;
-    public bool currentLobby;
+    public bool currentLobby = false;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
     private IEnumerator resizeRadius;
@@ -58,6 +58,22 @@ public class Lobby : MonoBehaviour
         }
     }
 
+    public string Usernames
+    {
+        get
+        {
+            return usernames;
+        }
+        set
+        {
+            usernames = value;
+            if (currentLobby)
+            {
+                LobbyPanel.Instance.usersList.text = usernames;
+            }
+        }
+    }
+
     public void InitializeLobby(string lobbyId, int isActive, int inProgress, string location, 
         string lobbyName, int playerNum, string usernames, float radius, 
         int timer, DatabaseReference db)
@@ -75,7 +91,7 @@ public class Lobby : MonoBehaviour
         // playerNum
         this.playerNum = playerNum;
         // usernames
-        this.usernames = usernames;
+        this.Usernames = usernames;
         // Radius
         this.radius = radius;
         // Timer
@@ -123,17 +139,17 @@ public class Lobby : MonoBehaviour
     {
         currentLobby = true;
         LobbyPanel.Instance.InitializeLobby(this);
-        LobbyPanel.Instance.openText.text = "Open: " + lobbyName;
         LobbyPanel.Instance.openButton.gameObject.SetActive(true);
     }
 
-    public void RemoveLobbyPanel()
+    public async void RemoveLobbyPanel()
     {
         if (currentLobby)
         {
+            await DatabaseManager.Instance.ExitLobby(lobbyId);
             LobbyPanel.Instance.lobby = null;
             currentLobby = false;
-            LobbyPanel.Instance.openText.text = "Open: Nothing";
+            LobbyPanel.Instance.usersList.text = "Open: Nothing";
             LobbyPanel.Instance.Close();
             LobbyPanel.Instance.openButton.gameObject.SetActive(false);
         }
@@ -150,7 +166,29 @@ public class Lobby : MonoBehaviour
         if (this)
         {
             isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
-            inProgress = Int32.Parse(args.Snapshot.Child(INPROGRESS).Value.ToString());
+            int checkInProgress = Int32.Parse(args.Snapshot.Child(INPROGRESS).Value.ToString());
+            if (checkInProgress != inProgress)
+            {
+                if (checkInProgress == 1)
+                {
+                    // Lobby is In Progress
+                    if (currentLobby)
+                    {
+                        lobbyRange.circle.color = new Color(172, 0, 255, 50);
+                    }
+                    else
+                    {
+                        lobbyRange.circle.color = new Color(173, 23, 14);
+                    }
+                }
+                else
+                {
+                    // Lobby is Not In Progress
+                    lobbyRange.circle.color = new Color(68, 0, 255, 50);
+                }
+                inProgress = checkInProgress;
+            }
+            
             playerNum = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
             
             string location = args.Snapshot.Child(LOCATION).Value.ToString();
@@ -163,10 +201,10 @@ public class Lobby : MonoBehaviour
 
             Timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
 
-            usernames = "";
+            Usernames = "";
             foreach (DataSnapshot user in args.Snapshot.Child(PLAYERS).Children)
             {
-                usernames += user.Value.ToString() + "\n";
+                Usernames += user.Value.ToString() + "\n";
             }
         }
     }

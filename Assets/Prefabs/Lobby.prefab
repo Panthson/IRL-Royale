@@ -44,12 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27cac87f166ffc948a2d961cafed3ab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lobbyId: 
   lobbyName: 
+  inProgress: 0
   isActive: 0
   playerNum: 0
-  players: []
+  users: []
   radius: 0
-  timer: 0
+  locationSet: 0
   currentLobby: 0
   lobbyRange: {fileID: 7052384595140314328}
 --- !u!1 &8186178093588676272
@@ -123,8 +125,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 60eabd252a94dbb449184234f6e10d13, type: 3}
-  m_Color: {r: 0.24296902, g: 0.735849, b: 0.31860322, a: 0.39215687}
+  m_Sprite: {fileID: 21300000, guid: b5a5c353384f84a42be65552baff0784, type: 3}
+  m_Color: {r: 0.2660625, g: 1, b: 0, a: 0.19607843}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -160,5 +162,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisLobby: {fileID: 3201304614855451065}
-  Circle: {fileID: 5559143551093962481}
-  Collider: {fileID: 3703340763394384047}
