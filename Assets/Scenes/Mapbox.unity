@@ -4333,7 +4333,7 @@ MonoBehaviour:
   _userHeadingSmoothing: {fileID: 114005716624011915}
   _deviceOrientationSmoothing: {fileID: 114338582043784473}
   _editorDebuggingOnly:
-    _mockUnityInputLocation: 1
+    _mockUnityInputLocation: 0
     _locationLogFile: {fileID: 4900000, guid: 5e6bb7224cef35c4788a4817b1c9778d, type: 3}
 --- !u!114 &114884899183434809
 MonoBehaviour:
