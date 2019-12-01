@@ -145,8 +145,7 @@ public class DatabaseManager : MonoBehaviour
             {
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
                 u.InitializeUser(user.Child(USERNAME).Value.ToString(),
-                    user.Child(ID).Value.ToString(), user.Child(LOCATION).Value.ToString(),
-                    user.Child(LOBBY).ToString(), Database.Child(USERS).Child(user.Key));
+                    user.Child(LOCATION).Value.ToString(), user.Child(LOBBY).ToString(), Database.Child(USERS).Child(user.Key));
                 users.Add(u);
             }
         }

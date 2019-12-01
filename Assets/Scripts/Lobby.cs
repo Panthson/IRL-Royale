@@ -21,6 +21,7 @@ public class Lobby : MonoBehaviour
     public int isActive;
     public int playerNum;
     public List<User> players;
+    public List<string> playerIds;
     public float radius;
     private int timer;
     public bool locationSet = false;
@@ -78,12 +79,7 @@ public class Lobby : MonoBehaviour
         // Timer
         Timer = timer;
         // Value Changed Listeners
-        this.db.ValueChanged += HandleIsActiveChanged;
-        this.db.ValueChanged += HandleInProgressChanged;
-        this.db.ValueChanged += HandleLocationChanged;
-        this.db.ValueChanged += HandlePlayersChanged;
-        this.db.ValueChanged += HandleRadiusChanged;
-        this.db.ValueChanged += HandleTimerChanged;
+        db.ValueChanged += HandleDataChanged;
         // Set Radius Size
         resizeRadius = SetRadiusSize(radius);
         StartCoroutine(resizeRadius);
@@ -141,7 +137,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    void HandleIsActiveChanged(object sender, ValueChangedEventArgs args)
+    void HandleDataChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -150,89 +146,26 @@ public class Lobby : MonoBehaviour
         }
         // Do something with the data in args.Snapshot
         if (this)
+        {
             isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
-    }
-    void HandleInProgressChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-        if (this)
             inProgress = Int32.Parse(args.Snapshot.Child(INPROGRESS).Value.ToString());
-    }
-
-    void HandlePlayerNumChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-        if (this)
             playerNum = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
-    }
-
-    void HandleLocationChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-
-        string location = args.Snapshot.Child(LOCATION).Value.ToString();
-        if (this)
+            
+            string location = args.Snapshot.Child(LOCATION).Value.ToString();
             SetLocation(location);
-    }
 
-    void HandlePlayersChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-
-        // loop and parse
-        if (this)
-        {
-
-        }
-    }
-
-    void HandleRadiusChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-        if (this)
-        {
             radius = float.Parse(args.Snapshot.Child(RADIUS).Value.ToString());
             StopCoroutine(resizeRadius);
             resizeRadius = SetRadiusSize(radius);
             StartCoroutine(resizeRadius);
-        }
-    }
 
-    void HandleTimerChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-        if (this)
             Timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
+
+            playerIds.Clear();
+            foreach (DataSnapshot user in args.Snapshot.Child(PLAYERS).Children) {
+                playerIds.Add(user.Key.ToString());
+            }
+        }
     }
 
     public IEnumerator SetRadiusSize(float radius)
@@ -248,22 +181,12 @@ public class Lobby : MonoBehaviour
     {
         if (paused)
         {
-            db.ValueChanged -= HandleIsActiveChanged;
-            db.ValueChanged -= HandleInProgressChanged;
-            db.ValueChanged -= HandleLocationChanged;
-            db.ValueChanged -= HandlePlayersChanged;
-            db.ValueChanged -= HandleRadiusChanged;
-            db.ValueChanged -= HandleTimerChanged;
+            db.ValueChanged -= HandleDataChanged;
         }
     }
 
     public void OnApplicationQuit()
     {
-        db.ValueChanged -= HandleIsActiveChanged;
-        db.ValueChanged -= HandleInProgressChanged;
-        db.ValueChanged -= HandleLocationChanged;
-        db.ValueChanged -= HandlePlayersChanged;
-        db.ValueChanged -= HandleRadiusChanged;
-        db.ValueChanged -= HandleTimerChanged;
+        db.ValueChanged -= HandleDataChanged;
     }
 }

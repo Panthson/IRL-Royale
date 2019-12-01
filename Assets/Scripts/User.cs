@@ -9,22 +9,25 @@ public class User : MonoBehaviour
     private readonly static string[] SEPARATOR = { ", ", "\n" };
     private const string ID = "id";
     private const string LOCATION = "location";
-    private const string USERNAME = "userName";
+    private const string USERNAME = "username";
+    private const string HEALTH = "health";
 
-    public string userName = null;
+    public string username = null;
     public string id = null;
+    public float health = 100f;
+    public string lastAttackedBy;
     public string lobby = null;
     public DatabaseReference userData = null;
     private IEnumerator locationLerp;
 
-    public void InitializeUser(string username, string id, string location, 
+    public void InitializeUser(string username, string location, 
         string lobby, DatabaseReference userData)
     {
-        userName = username;
-        this.id = id;
         this.userData = userData;
+        this.username = username;
+        id = userData.Key;
         this.lobby = lobby;
-        this.userData.ValueChanged += HandleLocationChanged;
+        this.userData.ValueChanged += HandleDataChanged;
         locationLerp = SetLocation(location);
         StartCoroutine(locationLerp);
     }
@@ -45,7 +48,7 @@ public class User : MonoBehaviour
     }
 
     // Handles Change in location of this user in the database
-    void HandleLocationChanged(object sender, ValueChangedEventArgs args)
+    void HandleDataChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -61,6 +64,15 @@ public class User : MonoBehaviour
             locationLerp = SetLocation(location);
             // Starts Coroutine to Move to location with new value
             StartCoroutine(locationLerp);
+            health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
+            if (health <= 0)
+            {
+                lastAttackedBy = args.Snapshot.Child("lastAttackedBy").Value.ToString();
+                if (lastAttackedBy == LoginInfo.Uid)
+                {
+                    Debug.Log("You killed " + username);
+                }
+            }
         }
     }
 
@@ -73,12 +85,12 @@ public class User : MonoBehaviour
     {
         if (paused)
         {
-            userData.ValueChanged -= HandleLocationChanged;
+            userData.ValueChanged -= HandleDataChanged;
         }
     }
 
     public void OnApplicationQuit()
     {
-        userData.ValueChanged -= HandleLocationChanged;
+        userData.ValueChanged -= HandleDataChanged;
     }
 }
