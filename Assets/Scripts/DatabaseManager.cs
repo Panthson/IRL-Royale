@@ -98,7 +98,8 @@ public class DatabaseManager : MonoBehaviour
         Database = FirebaseDatabase.DefaultInstance.RootReference;
         if (!LoginInfo.IsGuest)
         {
-            FirebaseUser firebaseUser = await Authenticator.SignInWithEmailAndPasswordAsync(LoginInfo.Email, LoginInfo.Password);
+            FirebaseUser firebaseUser = await Authenticator.
+                SignInWithEmailAndPasswordAsync(LoginInfo.Email, LoginInfo.Password);
             LoginInfo.Uid = firebaseUser.UserId;
         }
         else
@@ -132,11 +133,13 @@ public class DatabaseManager : MonoBehaviour
     }
 
     // Gets Users from Lobby
-    public async void GetUsers(string lobbyKey)
+    public async void GetUsers(Lobby lobby)
     {
         DeleteAllUsers();
         Debug.Log("Getting Users");
-        DataSnapshot userTree = await Database.Child(LOBBIES).Child(lobbyKey).GetValueAsync();
+        DataSnapshot userTree = await Database.Child(LOBBIES).Child(lobby.lobbyId).
+            Child(PLAYERS).GetValueAsync();
+
         foreach (DataSnapshot user in userTree.Children)
         {
             if (user.Key.Equals(LoginInfo.Uid))
@@ -145,8 +148,9 @@ public class DatabaseManager : MonoBehaviour
             {
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
                 u.InitializeUser(user.Child(USERNAME).Value.ToString(),
-                    user.Child(LOCATION).Value.ToString(), user.Child(LOBBY).ToString(), Database.Child(USERS).Child(user.Key));
-                users.Add(u);
+                    user.Child(LOCATION).Value.ToString(), user.Child(LOBBY).ToString(), 
+                    Database.Child(USERS).Child(user.Key));
+                lobby.users.Add(u);
             }
         }
     }
@@ -166,11 +170,17 @@ public class DatabaseManager : MonoBehaviour
             {
                 Lobby l = Instantiate(lobbyRef, Vector3.zero, Quaternion.identity, transform);
                 l.lobbyRange.enabled = false;
+
+                string usernames = "";
+                foreach (DataSnapshot user in lobby.Child(PLAYERS).Children) {
+                    usernames += user.Value.ToString() + "\n";
+                }
+
                 l.InitializeLobby(lobby.Key.ToString(), Int32.Parse(lobby.Child(ISACTIVE).Value.ToString()),
                     Int32.Parse(lobby.Child(INPROGRESS).Value.ToString()),
                     lobby.Child(LOCATION).Value.ToString(), lobby.Child(LOBBYNAME).Value.ToString(),
                     Int32.Parse(lobby.Child(PLAYERNUM).Value.ToString()),
-                    float.Parse(lobby.Child(RADIUS).Value.ToString()),
+                    usernames, float.Parse(lobby.Child(RADIUS).Value.ToString()),
                     Int32.Parse(lobby.Child(TIMER).Value.ToString()), Database.Child(LOBBIES).Child(lobby.Key));
 
                 lobbies.Add(l);

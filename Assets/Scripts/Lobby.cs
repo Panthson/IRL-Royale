@@ -20,8 +20,8 @@ public class Lobby : MonoBehaviour
     public int inProgress;
     public int isActive;
     public int playerNum;
-    public List<User> players;
-    public List<string> playerIds;
+    public List<User> users;
+    public string usernames;
     public float radius;
     private int timer;
     public bool locationSet = false;
@@ -59,8 +59,8 @@ public class Lobby : MonoBehaviour
     }
 
     public void InitializeLobby(string lobbyId, int isActive, int inProgress, string location, 
-        string lobbyName, int playerNum, float radius, int timer, 
-        DatabaseReference db)
+        string lobbyName, int playerNum, string usernames, float radius, 
+        int timer, DatabaseReference db)
     {
         // Gets the lobby ID
         this.lobbyId = lobbyId;
@@ -74,6 +74,8 @@ public class Lobby : MonoBehaviour
         this.inProgress = inProgress;
         // playerNum
         this.playerNum = playerNum;
+        // usernames
+        this.usernames = usernames;
         // Radius
         this.radius = radius;
         // Timer
@@ -161,9 +163,10 @@ public class Lobby : MonoBehaviour
 
             Timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
 
-            playerIds.Clear();
-            foreach (DataSnapshot user in args.Snapshot.Child(PLAYERS).Children) {
-                playerIds.Add(user.Key.ToString());
+            usernames = "";
+            foreach (DataSnapshot user in args.Snapshot.Child(PLAYERS).Children)
+            {
+                usernames += user.Value.ToString() + "\n";
             }
         }
     }
