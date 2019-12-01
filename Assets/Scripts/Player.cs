@@ -13,12 +13,16 @@ public class Player : MonoBehaviour
     private const string ATTACK = "attack";
     private const string KILLS = "kills";
     private const string DEATHS = "deaths";
+    private const string LAST_ATTACKED = "lastAttackedBy";
+    private const string LOBBY = "lobby";
     private Mapbox.Examples.LocationStatus loc;
     public string username;
+    public string lastAttackedBy = "";
+    public string lobby = "";
     public float health = 100f;
     public float attack = 5f;
-    public int kills;
-    public int deaths;
+    public int kills = 0;
+    public int deaths = 0;
     private Range range;
     private Image HealthBar;
     public static DatabaseReference db;
@@ -133,52 +137,25 @@ public class Player : MonoBehaviour
         if (db == null)
         {
             db = reference;
-            db.ValueChanged += Instance.HandleHealthChanged;
-            db.ValueChanged += Instance.HandleKillsChanged;
-            db.ValueChanged += Instance.HandleDeathsChanged;
+            db.ValueChanged += Instance.HandleDataChanged;
         }
     }
 
-    public void HandleHealthChanged(object sender, ValueChangedEventArgs args)
+    public void HandleDataChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
             Debug.LogError(args.DatabaseError.Message);
             return;
         }
-        // Do something with the data in args.Snapshot
 
+        // Do something with the data in args.Snapshot
         if (this)
+        {
             Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
-    }
-
-    public void HandleKillsChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-
-        if (this)
-        {
             kills = int.Parse(args.Snapshot.Child(KILLS).Value.ToString());
-        }
-    }
-
-    public void HandleDeathsChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
-
-        if (this)
-        {
             deaths = int.Parse(args.Snapshot.Child(DEATHS).Value.ToString());
+            lobby = args.Snapshot.Child(LOBBY).Value.ToString();
         }
     }
 
@@ -200,9 +177,7 @@ public class Player : MonoBehaviour
     {
         if (paused)
         {
-            db.ValueChanged -= HandleHealthChanged;
-            db.ValueChanged -= HandleKillsChanged;
-            db.ValueChanged -= HandleDeathsChanged;
+            db.ValueChanged -= HandleDataChanged;
         }
         else
         {
