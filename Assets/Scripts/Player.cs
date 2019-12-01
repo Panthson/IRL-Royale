@@ -147,7 +147,9 @@ public class Player : MonoBehaviour
         {
             Debug.LogError(args.DatabaseError.Message);
             return;
-        }
+        }; 
+
+        Debug.Log("Change detected");
 
         // Do something with the data in args.Snapshot
         if (this)
@@ -155,7 +157,10 @@ public class Player : MonoBehaviour
             Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
             kills = int.Parse(args.Snapshot.Child(KILLS).Value.ToString());
             deaths = int.Parse(args.Snapshot.Child(DEATHS).Value.ToString());
-            lobby = args.Snapshot.Child(LOBBY).Value.ToString();
+            lobby = args.Snapshot.Child(LOBBY).Value != null ?
+                    args.Snapshot.Child(LOBBY).Value.ToString() : "";
+            lastAttackedBy = args.Snapshot.Child(LAST_ATTACKED).Value != null ?
+                    args.Snapshot.Child(LAST_ATTACKED).Value.ToString() : "";
         }
     }
 
