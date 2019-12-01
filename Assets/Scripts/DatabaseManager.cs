@@ -127,8 +127,6 @@ public class DatabaseManager : MonoBehaviour
         {
             Player.Instance.username = player.Child(USERNAME).Value.ToString();
         }
-        Player.Instance.kills = int.Parse(player.Child(KILLS).Value.ToString());
-        Player.Instance.deaths = int.Parse(player.Child(DEATHS).Value.ToString());
         string jsonData = JsonUtility.ToJson(Player.Instance);
         await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
     }

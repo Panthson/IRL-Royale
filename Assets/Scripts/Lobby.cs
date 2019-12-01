@@ -22,7 +22,7 @@ public class Lobby : MonoBehaviour
     public int playerNum;
     public List<User> players;
     public float radius;
-    public int timer;
+    private int timer;
     public bool locationSet = false;
     public bool currentLobby;
     private DatabaseReference db;
@@ -39,6 +39,21 @@ public class Lobby : MonoBehaviour
         {
             lobbyRange.transform.localScale = new Vector3(value, value, 1f);
 
+        }
+    }
+    public int Timer
+    {
+        get
+        {
+            return timer;
+        }
+        set
+        {
+            timer = value;
+            if (currentLobby)
+            {
+                LobbyPanel.Instance.timerText.text = timer.ToString();
+            }
         }
     }
 
@@ -61,7 +76,7 @@ public class Lobby : MonoBehaviour
         // Radius
         this.radius = radius;
         // Timer
-        this.timer = timer;
+        Timer = timer;
         // Value Changed Listeners
         this.db.ValueChanged += HandleIsActiveChanged;
         this.db.ValueChanged += HandleInProgressChanged;
@@ -91,7 +106,7 @@ public class Lobby : MonoBehaviour
         }
         Vector3 newPosition = LocationProviderFactory.Instance.mapManager.
             GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
-        Debug.Log(lobbyName + " Timer: " + timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);
+        Debug.Log(lobbyName + " Timer: " + Timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);
         if (Mathf.Abs(newPosition.x) > 2000 || Mathf.Abs(newPosition.z) > 2000)
         {
             // delete this lobby because it is out of range
@@ -108,8 +123,8 @@ public class Lobby : MonoBehaviour
 
     public void SetLobbyPanel()
     {
-        LobbyPanel.Instance.InitializeLobby(this);
         currentLobby = true;
+        LobbyPanel.Instance.InitializeLobby(this);
         LobbyPanel.Instance.openText.text = "Open: " + lobbyName;
         LobbyPanel.Instance.openButton.gameObject.SetActive(true);
     }
@@ -217,7 +232,7 @@ public class Lobby : MonoBehaviour
         }
         // Do something with the data in args.Snapshot
         if (this)
-            timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
+            Timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
     }
 
     public IEnumerator SetRadiusSize(float radius)
