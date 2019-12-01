@@ -29,50 +29,15 @@ public class LogIn : MonoBehaviour
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
-    public void Update()
-    {
-        if (signed_in) {
-            Debug.Log("switching scenes");
-            SceneManager.LoadScene("MapBox");
-        }
-    }
-
-    public void Login()
+    public async void Login()
     {
         Debug.Log("button pressed");
-        FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, 
-            passwordInput.text).ContinueWith((task =>
-        {
-            if (task.IsCanceled)
-            {
-                Firebase.FirebaseException e =
-              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-
-                GetErrorMessage((AuthError)e.ErrorCode);
-                Debug.Log("task cancelled");
-                return;
-            }
-            if (task.IsFaulted)
-            {
-              
-                Firebase.FirebaseException e =
-                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-
-                GetErrorMessage((AuthError)e.ErrorCode);
-                Debug.Log("task faulted");
-                return;
-            }
-            if (task.IsCompleted)
-            {
-                Debug.Log("login successful");
-                LoginInfo.Email = emailInput.text;
-                LoginInfo.Password = passwordInput.text;
-                LoginInfo.Uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-                LoginInfo.IsGuest = false;
-
-                signed_in = true;
-            }
-        })); 
+        FirebaseUser user = await FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text);
+        LoginInfo.Email = emailInput.text;
+        LoginInfo.Password = passwordInput.text;
+        LoginInfo.Uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+        LoginInfo.IsGuest = false;
+        SceneManager.LoadScene("MapBox");
     }
 
     void GetErrorMessage(AuthError errorCode)

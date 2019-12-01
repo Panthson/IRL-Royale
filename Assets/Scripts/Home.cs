@@ -25,13 +25,6 @@ public class Home : MonoBehaviour
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if(signed_in)
-            SceneManager.LoadScene("MapBox");
-    }
-
     public void GoToLogin()
     {
         SceneManager.LoadScene("Login");
@@ -47,37 +40,16 @@ public class Home : MonoBehaviour
         SceneManager.LoadScene("Home");
     }
 
-    public void LogInAnonymous()
+    public async void LogInAnonymous()
     {
-        FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync().ContinueWith((task =>
-        {
-            if (task.IsCanceled)
-            {
-                Firebase.FirebaseException e =
-              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+        FirebaseUser newUser = await FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync();
+        Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+            newUser.DisplayName, newUser.UserId);
 
-                GetErrorMessage((AuthError)e.ErrorCode);
-                return;
-            }
-            if (task.IsFaulted)
-            {
+        LoginInfo.IsGuest = true;
+        LoginInfo.Uid = newUser.UserId;
 
-                Firebase.FirebaseException e =
-                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
-
-                GetErrorMessage((AuthError)e.ErrorCode);
-                return;
-            }
-
-            Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
-
-            LoginInfo.IsGuest = true;
-            LoginInfo.Uid = newUser.UserId;
-
-            signed_in = true;
-        }));
+        SceneManager.LoadScene("MapBox");
     }
 
     void GetErrorMessage(AuthError errorCode)
