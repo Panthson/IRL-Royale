@@ -9,6 +9,7 @@ public class LobbyPanel : MonoBehaviour
     public Text lobbyName;
     public Button openButton;
     public Text openText;
+    public Text timerText;
     public Lobby lobby;
     public bool isOpen = false;
 

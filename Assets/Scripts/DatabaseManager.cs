@@ -19,6 +19,8 @@ public class DatabaseManager : MonoBehaviour
     private const string ID = "id";
     private const string LOCATION = "location";
     private const string USERNAME = "username";
+    private const string KILLS = "kills";
+    private const string DEATHS = "deaths";
     private const string USERS = "users";
     private const string LOBBY = "lobby";
     private const string ROOT = "";
@@ -120,15 +122,13 @@ public class DatabaseManager : MonoBehaviour
         if (LoginInfo.IsGuest)
         {
             Player.Instance.username = ANONYMOUS_USERNAME;
-            string jsonData = JsonUtility.ToJson(Player.Instance);
-            await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
         }
         else
         {
             Player.Instance.username = player.Child(USERNAME).Value.ToString();
-            string jsonData = JsonUtility.ToJson(Player.Instance);
-            await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
         }
+        string jsonData = JsonUtility.ToJson(Player.Instance);
+        await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
     }
 
     // Gets Users from Lobby
