@@ -129,6 +129,7 @@ public class DatabaseManager : MonoBehaviour
         }
         string jsonData = JsonUtility.ToJson(Player.Instance);
         await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
+        Player.Instance.StartUpdatingPlayer();
     }
 
     // Gets Users from Lobby

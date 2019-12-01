@@ -137,8 +137,12 @@ public class Player : MonoBehaviour
         if (db == null)
         {
             db = reference;
-            db.ValueChanged += Instance.HandleDataChanged;
         }
+    }
+
+    public void StartUpdatingPlayer()
+    {
+        db.ValueChanged += Instance.HandleDataChanged;
     }
 
     public void HandleDataChanged(object sender, ValueChangedEventArgs args)
@@ -147,8 +151,7 @@ public class Player : MonoBehaviour
         {
             Debug.LogError(args.DatabaseError.Message);
             return;
-        }; 
-
+        };
         // Do something with the data in args.Snapshot
         if (this)
         {
@@ -189,7 +192,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-
+            
         }
     }
 
