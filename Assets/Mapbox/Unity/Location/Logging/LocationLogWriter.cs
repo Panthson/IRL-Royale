@@ -110,7 +110,7 @@ namespace Mapbox.Unity.Location
 
 			_lineCount++;
 			string logMsg = string.Join(Delimiter, lineTokens);
-			Debug.Log(logMsg);
+			// Debug.Log(logMsg);
 			_textWriter.WriteLine(logMsg);
 			_textWriter.Flush();
 		}

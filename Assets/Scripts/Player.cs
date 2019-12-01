@@ -149,8 +149,6 @@ public class Player : MonoBehaviour
             return;
         }; 
 
-        Debug.Log("Change detected");
-
         // Do something with the data in args.Snapshot
         if (this)
         {
@@ -161,6 +159,11 @@ public class Player : MonoBehaviour
                     args.Snapshot.Child(LOBBY).Value.ToString() : "";
             lastAttackedBy = args.Snapshot.Child(LAST_ATTACKED).Value != null ?
                     args.Snapshot.Child(LAST_ATTACKED).Value.ToString() : "";
+            Debug.Log("Health: " + health
+                    + "kills: " + kills
+                    + "deaths: " + deaths
+                    + "lobby: " + lobby
+                    + "lastAttackedBy: " + lastAttackedBy);
         }
     }
 
