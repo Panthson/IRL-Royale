@@ -4,17 +4,59 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 /* function: reduceHP
- * description: reduces the HP of a player (data.text) by 5
+ * description: reduces the HP of a player by 5
  * trigger: https call
  */
 exports.reduceHP = functions.https.onCall((data, context) => {
-	const userID = data.text;
+	const enemyID = data.enemyId;
+	const attackerID = data.attackerId;
 
-	admin.database().ref('/users/'+userID+'/hp').transaction(hp => {
-		if(hp === null)
+	admin.database().ref('/users/'+enemyID+'/health').transaction(health => {
+		if(health === null)
 			return null;
-		else
-			return hp - 5;
+		else if(health === 0)
+			return 0;
+		else {
+			admin.database().ref('/users/'+enemyID+'/lastAttackedBy').set(attackerID);
+			return health - 5;
+		}
+	})
+});
+
+/* function: joinLobby
+ * description: adds a user to a lobby
+ * trigger: https call
+ */
+exports.joinLobby = functions.https.onCall((data, context) => {
+	const playerID = data.playerId;
+	const playerUsername = data.username;
+	const lobbyID = data.lobbyId;
+
+	admin.database().ref('/users/'+playerID+'/lobby').transaction(lobby => {
+		admin.database().ref('/lobbies/'+lobbyID+'/players/'+playerID).set(playerUsername);
+		return lobbyID;
+	}, function(){
+		admin.database().ref('/lobbies/'+lobbyID+'/playerNum').transaction(count => {
+			return count + 1;
+		})
+	})
+});
+
+/* function: exitLobby
+ * description: removes a user from a lobby
+ * trigger: https call
+ */
+exports.exitLobby = functions.https.onCall((data, context) => {
+	const playerID = data.playerId;
+	const lobbyID = data.lobbyId;
+
+	admin.database().ref('/users/'+playerID+'/lobby').transaction(lobby => {
+		admin.database().ref('/lobbies/'+lobbyID+'/players/'+playerID).remove();
+		return "null";
+	}, function(){
+		admin.database().ref('/lobbies/'+lobbyID+'/playerNum').transaction(count => {
+			return count - 1;
+		})
 	})
 });
 
@@ -90,9 +132,9 @@ exports.setNotInProgress = functions.database.ref('/lobbies/{lobbyId}/playerNum'
 
 /* function: setDeath
  * description: removes a player from a lobby when their HP is 0
- * trigger: player.hp == 0
+ * trigger: player.health == 0
  */
-exports.setDeath = functions.database.ref('/users/{userID}/hp')
+exports.setDeath = functions.database.ref('/users/{userID}/health')
 	.onUpdate((change, context) => {
 	
 	if(parseInt(change.before.val().toString(), 10) <= 0)
@@ -109,6 +151,24 @@ exports.setDeath = functions.database.ref('/users/{userID}/hp')
 			}, function(){
 				lobbyRef.child(lobbyID).child('playerNum').transaction(count => {
 					return count - 1;
+				}, function(){
+					change.after.ref.parent.child('lastAttackedBy').once('value').then(snap => {
+						var killerID = snap.val();
+
+						admin.database().ref('/users/'+killerID+'/kills').transaction(kills => {
+							if(kills === null)
+								return 1;
+							else
+								return kills+1;
+						}, function(){
+							change.after.ref.parent.child('deaths').transaction(deaths => {
+								if(deaths === null)
+									return 1;
+								else
+									return deaths+1;
+							})
+						})
+					});
 				})
 			})
 		})
