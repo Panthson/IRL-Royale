@@ -18,20 +18,9 @@ public class LocationLogMaker : MonoBehaviour
         logWriter = new LocationLogWriter();
         _locationProvider = LocationProviderFactory.Instance.DefaultLocationProvider;
 
-        // only work if on Android
-        var regex = new Regex(@"(?<=API-)-?\d+");
-        Match match = regex.Match(SystemInfo.operatingSystem); // eg 'Android OS 8.1.0 / API-27 (OPM2.171019.029/4657601)'
-        isAndroid = match.Success;
-
-        if (isAndroid)
-        {
-            _locationProvider.OnLocationUpdated += LocationLogger_OnLocationUpdated;
-            Debug.Log("writing log to " + Application.persistentDataPath);
-        }
-        else
-        {
-            Debug.Log("not on Android, so not taking logs");
-        }
+       
+        _locationProvider.OnLocationUpdated += LocationLogger_OnLocationUpdated;
+        Debug.Log("writing log to " + Application.persistentDataPath);
     }
 
 // Update is called once per frame
@@ -42,10 +31,6 @@ void Update()
 
     void LocationLogger_OnLocationUpdated(Mapbox.Unity.Location.Location location)
     {
-        // only log if on android
-        if (isAndroid)
-        {
-            logWriter.Write(location);
-        }
+        logWriter.Write(location);
     }
 }
