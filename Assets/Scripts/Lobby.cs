@@ -107,17 +107,19 @@ public class Lobby : MonoBehaviour
     {
         string[] loc = location.Split(SEPARATOR, 2,
             System.StringSplitOptions.None);
+        Debug.Log("WORKING WITH: " + lobbyName);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
-        if (Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x) > 0.001f ||
+        /*if (Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x) > 0.001f ||
             Mathf.Abs(longitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.y) > 0.001f)
         {
-            //Debug.Log("Latitude: " + latitude + "\nLongitude: " + longitude);
+            Debug.Log("FUCK");
+            Debug.Log(Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x));
             // delete this lobby because it is out of range
             DatabaseManager.Instance.lobbies.Remove(this);
             Destroy(gameObject);
             return;
-        }
+        }*/
         Vector3 newPosition = LocationProviderFactory.Instance.mapManager.
             GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
         Debug.Log(lobbyName + " Timer: " + Timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);

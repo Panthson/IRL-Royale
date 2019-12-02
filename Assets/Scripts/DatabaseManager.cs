@@ -112,6 +112,7 @@ public class DatabaseManager : MonoBehaviour
         EndLoad();
         initialized = true;
         GetLobbies();
+        
     }
 
     // Adds Current Player to Database if initialized
@@ -144,12 +145,13 @@ public class DatabaseManager : MonoBehaviour
         {
             if (user.Key.Equals(LoginInfo.Uid))
                 continue;
-            if (user.Child(USERNAME).Value.ToString() != null)
+            if (user.Value.ToString() != null)
             {
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
                 u.InitializeUser(user.Child(USERNAME).Value.ToString(),
                     user.Child(LOCATION).Value.ToString(), user.Child(LOBBY).ToString(), 
                     Database.Child(USERS).Child(user.Key));
+                Debug.Log("ADDING " + u.username + " TO LIST");
                 lobby.users.Add(u);
             }
         }
@@ -161,7 +163,6 @@ public class DatabaseManager : MonoBehaviour
         StartLoad();
         loadingText.text = "Getting Lobbies...";
         DeleteAllLobbies();
-        Debug.Log("Getting Lobbies");
         await Task.Delay(TimeSpan.FromSeconds(1));
         DataSnapshot lobbyTree = await Database.Child(LOBBIES).GetValueAsync();
         foreach (DataSnapshot lobby in lobbyTree.Children)
@@ -185,6 +186,7 @@ public class DatabaseManager : MonoBehaviour
 
                 lobbies.Add(l);
                 l.lobbyRange.enabled = true;
+                GetUsers(l);
                 Debug.Log(l.lobbyName);
             }
 

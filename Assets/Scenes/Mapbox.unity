@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4201,7 +4201,7 @@ MonoBehaviour:
   _autoFireEvent: 1
   _updateInterval: 0.1
   _sendEvent: 0
-  _locationLogFile: {fileID: 4900000, guid: b6b89e6420df83f40967cf095fc3c0ea, type: 3}
+  _locationLogFile: {fileID: 4900000, guid: c4a16eda1f1fdb44dbdffe59db0af1fc, type: 3}
 --- !u!114 &114330636100448489
 MonoBehaviour:
   m_ObjectHideFlags: 0
