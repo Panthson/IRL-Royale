@@ -169,8 +169,10 @@ public class DatabaseManager : MonoBehaviour
         {
             if (lobby.Child(LOBBYNAME).Value.ToString() != null)
             {
+
                 Lobby l = Instantiate(lobbyRef, Vector3.zero, Quaternion.identity, transform);
                 l.lobbyRange.enabled = false;
+                l.gameObject.SetActive(false);
 
                 string usernames = "";
                 foreach (DataSnapshot user in lobby.Child(PLAYERS).Children) {
@@ -186,7 +188,6 @@ public class DatabaseManager : MonoBehaviour
 
                 lobbies.Add(l);
                 l.lobbyRange.enabled = true;
-                GetUsers(l);
                 Debug.Log(l.lobbyName);
             }
 

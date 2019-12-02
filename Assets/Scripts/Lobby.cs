@@ -100,29 +100,33 @@ public class Lobby : MonoBehaviour
         db.ValueChanged += HandleDataChanged;
         // Set Radius Size
         resizeRadius = SetRadiusSize(radius);
-        StartCoroutine(resizeRadius);
+        if (isActiveAndEnabled)
+            StartCoroutine(resizeRadius);
     }
 
     public void SetLocation(string location)
     {
         string[] loc = location.Split(SEPARATOR, 2,
             System.StringSplitOptions.None);
-        Debug.Log("WORKING WITH: " + lobbyName);
+        //Debug.Log("WORKING WITH: " + lobbyName);
         float latitude = float.Parse(loc[0]);
         float longitude = float.Parse(loc[1]);
-        /*if (Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x) > 0.001f ||
+        // check if within range of player
+        if (Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x) > 0.001f ||
             Mathf.Abs(longitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.y) > 0.001f)
         {
-            Debug.Log("FUCK");
-            Debug.Log(Mathf.Abs(latitude) - Mathf.Abs((float)Player.Instance.Loc.currLoc.LatitudeLongitude.x));
             // delete this lobby because it is out of range
             DatabaseManager.Instance.lobbies.Remove(this);
             Destroy(gameObject);
             return;
-        }*/
+        }
+        else
+        {
+            gameObject.SetActive(true);
+        }
         Vector3 newPosition = LocationProviderFactory.Instance.mapManager.
             GeoToWorldPosition(new Mapbox.Utils.Vector2d(latitude, longitude));
-        Debug.Log(lobbyName + " Timer: " + Timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);
+        //Debug.Log(lobbyName + " Timer: " + Timer + " CurrentPosition: " + transform.position + " NewPosition: " + newPosition);
         if (Mathf.Abs(newPosition.x) > 2000 || Mathf.Abs(newPosition.z) > 2000)
         {
             // delete this lobby because it is out of range

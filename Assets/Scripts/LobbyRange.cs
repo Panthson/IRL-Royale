@@ -8,11 +8,6 @@ public class LobbyRange : MonoBehaviour
     public Lobby thisLobby;
     public SpriteRenderer circle;
 
-    void Start()
-    {
-        circle = this.gameObject.GetComponent<SpriteRenderer>();
-    }
-
     public async void OnTriggerEnter(Collider other)
     {
         while (!thisLobby.locationSet)
