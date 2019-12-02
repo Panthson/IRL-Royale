@@ -44,8 +44,8 @@ public class LobbyPanel : MonoBehaviour
     public async void ExitLobby()
     {
         await DatabaseManager.Instance.ExitLobby(lobby.lobbyId);
-        exitButton.gameObject.SetActive(true);
-        joinButton.gameObject.SetActive(false);
+        exitButton.gameObject.SetActive(false);
+        joinButton.gameObject.SetActive(true);
     }
 
     public void Open()
