@@ -23,9 +23,29 @@ public class Player : MonoBehaviour
     public float attack = 5f;
     public int kills = 0;
     public int deaths = 0;
+    private bool canAttack = false;
     private Range range;
     private Image HealthBar;
     public static DatabaseReference db;
+
+    void Start()
+    {
+        range = GetComponentInChildren<Range>();
+    }
+
+    public bool CanAttack
+    {
+        get
+        {
+            if (range == null) return false; 
+            return range.canAttack;
+        }
+        set
+        {
+            if (range != null) 
+                range.canAttack = value;
+        }
+    }
 
     public Mapbox.Examples.LocationStatus Loc
     {
@@ -162,11 +182,11 @@ public class Player : MonoBehaviour
                     args.Snapshot.Child(LOBBY).Value.ToString() : "";
             lastAttackedBy = args.Snapshot.Child(LAST_ATTACKED).Value != null ?
                     args.Snapshot.Child(LAST_ATTACKED).Value.ToString() : "";
-            Debug.Log("Health: " + health
+            /*Debug.Log("Health: " + health
                     + "kills: " + kills
                     + "deaths: " + deaths
                     + "lobby: " + lobby
-                    + "lastAttackedBy: " + lastAttackedBy);
+                    + "lastAttackedBy: " + lastAttackedBy);*/
         }
     }
 

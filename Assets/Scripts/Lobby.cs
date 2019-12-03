@@ -26,6 +26,7 @@ public class Lobby : MonoBehaviour
     private int timer;
     public bool locationSet = false;
     public bool currentLobby = false;
+    public bool joined = false;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
     private IEnumerator resizeRadius;
@@ -171,49 +172,73 @@ public class Lobby : MonoBehaviour
         // Do something with the data in args.Snapshot
         if (this)
         {
-            isActive = Int32.Parse(args.Snapshot.Child(ISACTIVE).Value.ToString());
-            int checkInProgress = Int32.Parse(args.Snapshot.Child(INPROGRESS).Value.ToString());
-            if (checkInProgress != inProgress)
+            UpdateLobby(args.Snapshot);
+        }
+    }
+
+    async void UpdateLobby(DataSnapshot snapshot)
+    {
+        Timer = Int32.Parse(snapshot.Child(TIMER).Value.ToString());
+        isActive = Int32.Parse(snapshot.Child(ISACTIVE).Value.ToString());
+        playerNum = Int32.Parse(snapshot.Child(PLAYERNUM).Value.ToString());
+        string location = snapshot.Child(LOCATION).Value.ToString();
+        SetLocation(location);
+        radius = float.Parse(snapshot.Child(RADIUS).Value.ToString());
+        StopCoroutine(resizeRadius);
+        resizeRadius = SetRadiusSize(radius);
+        StartCoroutine(resizeRadius);
+
+        Usernames = "";
+        foreach (DataSnapshot user in snapshot.Child(PLAYERS).Children)
+        {
+            Usernames += user.Value.ToString() + "\n";
+        }
+        int checkInProgress = Int32.Parse(snapshot.Child(INPROGRESS).Value.ToString());
+        // If match is starting right now
+        if (checkInProgress != inProgress)
+        {
+            inProgress = checkInProgress;
+            // Match About to Start
+            if (checkInProgress == 1)
             {
-                if (checkInProgress == 1)
+                // Lobby is In Progress
+                if (joined)
                 {
-                    // Lobby is In Progress
-                    if (currentLobby)
-                    {
-                        lobbyRange.circle.color = new Color(172, 0, 255, 50);
-                    }
-                    else
-                    {
-                        lobbyRange.circle.color = new Color(173, 23, 14);
-                    }
+                    Debug.Log("Match Started");
+                    // You are in this match and it has started
+                    await DatabaseManager.Instance.GetUsers(snapshot.Child(PLAYERS), this);
+                    LobbyPanel.Instance.OpenBattlePanel();
+                    Player.Instance.CanAttack = true;
+                    lobbyRange.circle.color = new Color(172, 0, 255, 50);
                 }
                 else
                 {
-                    // Lobby is Not In Progress
-                    lobbyRange.circle.color = new Color(68, 0, 255, 50);
+                    Debug.Log("Match Started Without You");
+                    // The match has started and you are not in
+                    LobbyPanel.Instance.OpenMainPanel();
+                    lobbyRange.circle.color = new Color(173, 23, 14);
                 }
-                inProgress = checkInProgress;
             }
-            
-            playerNum = Int32.Parse(args.Snapshot.Child(PLAYERNUM).Value.ToString());
-            
-            string location = args.Snapshot.Child(LOCATION).Value.ToString();
-            SetLocation(location);
-
-            radius = float.Parse(args.Snapshot.Child(RADIUS).Value.ToString());
-            StopCoroutine(resizeRadius);
-            resizeRadius = SetRadiusSize(radius);
-            StartCoroutine(resizeRadius);
-
-            Timer = Int32.Parse(args.Snapshot.Child(TIMER).Value.ToString());
-
-            Usernames = "";
-            foreach (DataSnapshot user in args.Snapshot.Child(PLAYERS).Children)
+            // Match Ended
+            else
             {
-                Usernames += user.Value.ToString() + "\n";
+                Debug.Log("Match Ended");
+                Player.Instance.CanAttack = false;
+                DatabaseManager.Instance.DeleteAllUsers(this);
+                // Sets Back to Green
+                lobbyRange.circle.color = new Color(68, 0, 255, 50);
+                joined = false;
             }
+
+            // Match now inProgress
         }
+        // Match Going On
     }
+
+    /*public async void TestGetUsers()
+    {
+        await DatabaseManager.Instance.GetUsers();
+    }*/
 
     public IEnumerator SetRadiusSize(float radius)
     {
@@ -224,16 +249,16 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    public void OnApplicationPause(bool paused)
+    /*public void OnApplicationPause(bool paused)
     {
         if (paused)
         {
             db.ValueChanged -= HandleDataChanged;
         }
-    }
+    }*/
 
-    public void OnApplicationQuit()
+    /*public void OnApplicationQuit()
     {
         db.ValueChanged -= HandleDataChanged;
-    }
+    }*/
 }

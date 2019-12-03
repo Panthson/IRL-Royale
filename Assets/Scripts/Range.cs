@@ -5,10 +5,10 @@ using UnityEngine;
 public class Range : MonoBehaviour
 {
     public SpriteRenderer Circle;
-
+    public bool canAttack = false;
     public SphereCollider Collider;
 
-    private HashSet<string> enemies;
+    public HashSet<string> enemies;
 
     void Start()
     {
@@ -17,13 +17,16 @@ public class Range : MonoBehaviour
 
     void Update()
     {
-        foreach (Touch touch in Input.touches)
+        if (canAttack)
         {
-            if (touch.fingerId == 0)
+            foreach (Touch touch in Input.touches)
             {
-                if (Input.GetTouch(0).phase == TouchPhase.Began)
+                if (touch.fingerId == 0)
                 {
-                    AttackEnemies();
+                    if (Input.GetTouch(0).phase == TouchPhase.Began)
+                    {
+                        AttackEnemies();
+                    }
                 }
             }
         }
@@ -34,7 +37,6 @@ public class Range : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             string enemyID = other.gameObject.GetComponent<User>().id;
-            string enemyUsername = other.gameObject.GetComponent<User>().username;
             enemies.Add(enemyID);
         }
     }
@@ -44,17 +46,18 @@ public class Range : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             string enemyID = other.gameObject.GetComponent<User>().id;
-            string enemyUsername = other.gameObject.GetComponent<User>().username;
             enemies.Remove(enemyID);
         }
     }
 
     private void AttackEnemies()
     {
-        foreach(string id in enemies)
+        Debug.Log("Sending Attack Call to Enemies:");
+        foreach (string enemyID in enemies)
         {
-            Debug.Log("ATTACK: " + id);
+            Debug.Log(enemyID);
         }
+        DatabaseManager.Instance.SendAttackCall(enemies);
     }
 
 

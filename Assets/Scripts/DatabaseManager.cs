@@ -37,11 +37,11 @@ public class DatabaseManager : MonoBehaviour
     private static DatabaseManager instance;
     private FirebaseAuth Authenticator;
     private FirebaseFunctions Functions;
+    private FirebaseDatabase Database;
 
     // PUBLIC VARIABLES
     public bool initialized;
-    public DatabaseReference Database;
-    public List<User> users;
+    
     public User userRef;
     public List<Lobby> lobbies;
     public Lobby lobbyRef;
@@ -93,7 +93,7 @@ public class DatabaseManager : MonoBehaviour
             app.SetEditorDatabaseUrl(app.Options.DatabaseUrl);
         // user authentication
         Authenticator = FirebaseAuth.DefaultInstance;
-        Database = FirebaseDatabase.DefaultInstance.RootReference;
+        Database = FirebaseDatabase.DefaultInstance;
         Functions = FirebaseFunctions.DefaultInstance;
         if (!LoginInfo.IsGuest)
         {
@@ -111,15 +111,15 @@ public class DatabaseManager : MonoBehaviour
         await SetPlayer(LoginInfo.Uid);
         EndLoad();
         initialized = true;
-        GetLobbies();
+        await GetLobbies();
         
     }
 
     // Adds Current Player to Database if initialized
     public async Task SetPlayer(string id)
     {
-        Player.SetDatabaseReference(Database.Child(USERS).Child(id));
-        DataSnapshot player = await Database.Child(USERS).Child(id).GetValueAsync();
+        Player.SetDatabaseReference(Database.GetReference(USERS).Child(id));
+        DataSnapshot player = await Database.GetReference(USERS).Child(id).GetValueAsync();
         if (LoginInfo.IsGuest)
         {
             Player.Instance.username = ANONYMOUS_USERNAME;
@@ -129,42 +129,55 @@ public class DatabaseManager : MonoBehaviour
             Player.Instance.username = player.Child(USERNAME).Value.ToString();
         }
         string jsonData = JsonUtility.ToJson(Player.Instance);
-        await Database.Child(USERS).Child(id).SetRawJsonValueAsync(jsonData);
+        await Database.GetReference(USERS).Child(id).SetRawJsonValueAsync(jsonData);
         Player.Instance.StartUpdatingPlayer();
     }
 
     // Gets Users from Lobby
-    public async void GetUsers(Lobby lobby)
+    public async Task GetUsers(DataSnapshot players, Lobby lobby)
     {
-        DeleteAllUsers();
-        Debug.Log("Getting Users");
-        DataSnapshot userTree = await Database.Child(LOBBIES).Child(lobby.lobbyId).
-            Child(PLAYERS).GetValueAsync();
-
-        foreach (DataSnapshot user in userTree.Children)
+        DeleteAllUsers(lobby);
+        
+        List<string> userIds = new List<string>();
+        foreach (DataSnapshot user in players.Children)
         {
-            if (user.Key.Equals(LoginInfo.Uid))
-                continue;
-            if (user.Value.ToString() != null)
+            userIds.Add(user.Key);
+        }
+
+        foreach (string id in userIds)
+        {
+            Debug.Log("ID: " + id);
+        }
+
+        foreach (string id in userIds) 
+        {
+            Debug.Log("Instantiating user: " + id);
+            if (id.Equals(LoginInfo.Uid))
             {
+                Debug.Log("Skipping this user");
+            }
+            else
+            {
+                DataSnapshot userObject = await Database.GetReference(USERS).Child(id).GetValueAsync();
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
-                u.InitializeUser(user.Child(USERNAME).Value.ToString(),
-                    user.Child(LOCATION).Value.ToString(), user.Child(LOBBY).ToString(), 
-                    Database.Child(USERS).Child(user.Key));
-                Debug.Log("ADDING " + u.username + " TO LIST");
+                //Debug.Log("Username: " + userObject.Child(USERNAME).Value.ToString());
+                u.InitializeUser(userObject.Child(USERNAME).Value.ToString(),
+                    userObject.Child(LOCATION).Value.ToString(), userObject.Child(LOBBY).ToString(), 
+                    id, Database.GetReference(USERS).Child(userObject.Key), lobby);
+                //Debug.Log("ADDING " + u.username + " TO LIST");
                 lobby.users.Add(u);
             }
         }
     }
 
     // Gets Lobbies from Database
-    public async void GetLobbies()
+    public async Task GetLobbies()
     {
         StartLoad();
         loadingText.text = "Getting Lobbies...";
         DeleteAllLobbies();
         await Task.Delay(TimeSpan.FromSeconds(1));
-        DataSnapshot lobbyTree = await Database.Child(LOBBIES).GetValueAsync();
+        DataSnapshot lobbyTree = await Database.GetReference(LOBBIES).GetValueAsync();
         foreach (DataSnapshot lobby in lobbyTree.Children)
         {
             if (lobby.Child(LOBBYNAME).Value.ToString() != null)
@@ -184,7 +197,7 @@ public class DatabaseManager : MonoBehaviour
                     lobby.Child(LOCATION).Value.ToString(), lobby.Child(LOBBYNAME).Value.ToString(),
                     Int32.Parse(lobby.Child(PLAYERNUM).Value.ToString()),
                     usernames, float.Parse(lobby.Child(RADIUS).Value.ToString()),
-                    Int32.Parse(lobby.Child(TIMER).Value.ToString()), Database.Child(LOBBIES).Child(lobby.Key));
+                    Int32.Parse(lobby.Child(TIMER).Value.ToString()), Database.GetReference(LOBBIES).Child(lobby.Key));
 
                 lobbies.Add(l);
                 l.lobbyRange.enabled = true;
@@ -224,16 +237,39 @@ public class DatabaseManager : MonoBehaviour
         });
     }
 
+    private Task<string> ReduceHP(string enemyId)
+    {
+        // Create the arguments to the callable function.
+        var data = new Dictionary<string, object>();
+        data["enemyId"] = enemyId;
+        data["attackerId"] = LoginInfo.Uid;
+
+        // Call the function and extract the operation from the result.
+        var function = Functions.GetHttpsCallable("reduceHP");
+
+        Debug.Log("calling database function");
+        return function.CallAsync(data).ContinueWith((task) => {
+            return (string)task.Result.Data;
+        });
+    }
+
+    public void SendAttackCall(HashSet<string> enemies)
+    {
+        foreach(string enemyId in enemies)
+        {
+            ReduceHP(enemyId);
+        }
+    }
 
     // Deletes all Users
-    public void DeleteAllUsers()
+    public void DeleteAllUsers(Lobby lobby)
     {
-        if (users.Count == 0) return;
-        foreach(User user in users)
+        if (lobby.users.Count == 0) return;
+        foreach(User user in lobby.users)
         {
             Destroy(user.gameObject);
         }
-        users.Clear();
+        lobby.users.Clear();
     }
 
     // Deletes all Lobbies
@@ -255,7 +291,7 @@ public class DatabaseManager : MonoBehaviour
             if (Database != null)
             {
                 if (LoginInfo.IsGuest)
-                    Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+                    Database.GetReference(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
             }
         }
     }
@@ -265,7 +301,7 @@ public class DatabaseManager : MonoBehaviour
         if (Database != null)
         {
             if (LoginInfo.IsGuest)
-                Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+                Database.GetReference(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
         }
     }
 }
