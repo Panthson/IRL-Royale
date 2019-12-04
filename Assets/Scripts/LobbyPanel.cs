@@ -9,9 +9,15 @@ public class LobbyPanel : MonoBehaviour
     public CanvasGroup mainPanel;
     public CanvasGroup battlePanel;
     public Text lobbyName;
+    public Text lobbyName2;
+    private string lobbyNameValue;
     public Button openButton;
     public Text usersList;
     public Text timerText;
+    public Text timerText2;
+    public Text timerBattleText;
+    public Text battleText;
+    private string timerValue;
     public Lobby lobby;
     public Button joinButton;
     public Button exitButton;
@@ -30,10 +36,48 @@ public class LobbyPanel : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (lobby)
+        {
+            if (lobby.joined)
+                battleText.text = "Players Remaining: " + lobby.playerNum + '\n' + "Kills: " + Player.Instance.currentKills;
+        }
+    }
+
+    public string TimerValue
+    {
+        get
+        {
+            return timerValue;
+        }
+        set
+        {
+            timerValue = value;
+            timerText.text = timerValue;
+            timerText2.text = timerValue;
+            timerBattleText.text = timerValue;
+        }
+    }
+
+    public string LobbyNameValue
+    {
+        get
+        {
+            return lobbyNameValue;
+        }
+        set
+        {
+            lobbyNameValue = value;
+            lobbyName.text = lobbyNameValue;
+            lobbyName2.text = lobbyNameValue;
+        }
+    }
+
     public void InitializeLobby(Lobby lobby)
     {
         this.lobby = lobby;
-        lobbyName.text = lobby.lobbyName;
+        LobbyNameValue = lobby.lobbyName;
         usersList.text = lobby.Usernames;
     }
 

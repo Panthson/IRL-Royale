@@ -54,7 +54,7 @@ public class Lobby : MonoBehaviour
             timer = value;
             if (currentLobby)
             {
-                LobbyPanel.Instance.timerText.text = timer.ToString();
+                LobbyPanel.Instance.TimerValue= timer.ToString();
             }
         }
     }
@@ -184,9 +184,13 @@ public class Lobby : MonoBehaviour
         string location = snapshot.Child(LOCATION).Value.ToString();
         SetLocation(location);
         radius = float.Parse(snapshot.Child(RADIUS).Value.ToString());
-        StopCoroutine(resizeRadius);
-        resizeRadius = SetRadiusSize(radius);
-        StartCoroutine(resizeRadius);
+        if (isActiveAndEnabled)
+        {
+            StopCoroutine(resizeRadius);
+            resizeRadius = SetRadiusSize(radius);
+            StartCoroutine(resizeRadius);
+        }
+        
 
         Usernames = "";
         foreach (DataSnapshot user in snapshot.Child(PLAYERS).Children)
@@ -228,6 +232,8 @@ public class Lobby : MonoBehaviour
                 // Sets Back to Green
                 lobbyRange.circle.color = new Color(68, 0, 255, 50);
                 joined = false;
+                // TODO: Set true or false to update values of player depending on if they win or lose the match.
+                Player.Instance.SetNewKillDeathValues(false);
             }
 
             // Match now inProgress

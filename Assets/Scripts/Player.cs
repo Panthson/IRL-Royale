@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     public float health = 100f;
     public float attack = 5f;
     public int kills = 0;
+    public int currentKills = 0;
     public int deaths = 0;
     private bool canAttack = false;
     private Range range;
@@ -187,6 +188,17 @@ public class Player : MonoBehaviour
                     + "deaths: " + deaths
                     + "lobby: " + lobby
                     + "lastAttackedBy: " + lastAttackedBy);*/
+        }
+    }
+
+    public async void SetNewKillDeathValues(bool death)
+    {
+        int newKills = kills + currentKills;
+        await db.Child(KILLS).SetValueAsync(newKills.ToString());
+        if (death)
+        {
+            deaths++;
+            await db.Child(DEATHS).SetValueAsync(deaths.ToString());
         }
     }
 

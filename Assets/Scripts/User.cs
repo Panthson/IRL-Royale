@@ -75,6 +75,7 @@ public class User : MonoBehaviour
                     if (lastAttackedBy == LoginInfo.Uid)
                     {
                         Debug.Log("You killed " + username);
+                        Player.Instance.currentKills++;
                         Death();
                     }
                 }

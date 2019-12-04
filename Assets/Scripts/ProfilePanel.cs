@@ -6,6 +6,7 @@ using Firebase.Database;
 using Firebase.Unity.Editor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ProfilePanel : MonoBehaviour
 {
@@ -16,9 +17,11 @@ public class ProfilePanel : MonoBehaviour
 
     public DatabaseReference Database;
     public CanvasGroup profilePanel;
+    public Text Stats;
 
     public void Open()
     {
+        Stats.text = "Username: " + LoginInfo.Username + "\nTotal Kills: " + Player.Instance.kills.ToString() + "\nTotal Deaths: " + Player.Instance.deaths.ToString();
         profilePanel.alpha = 1;
         profilePanel.blocksRaycasts = true;
     }
