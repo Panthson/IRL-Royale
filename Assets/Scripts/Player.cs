@@ -95,6 +95,7 @@ public class Player : MonoBehaviour
             {
                 health = value;
             }
+            StopAllCoroutines();
             StartCoroutine(SetHealthBar(health/100));
         }
     }

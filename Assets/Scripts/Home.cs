@@ -23,6 +23,7 @@ public class Home : MonoBehaviour
     {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl(DATA_URL);
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+        Input.location.Start();
     }
 
     public void GoToLogin()

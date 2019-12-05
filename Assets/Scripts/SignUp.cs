@@ -94,7 +94,7 @@ public class SignUp : MonoBehaviour
                 return;
             }
             // Firebase user has been created.
-            Firebase.Auth.FirebaseUser newUser = task.Result;
+            FirebaseUser newUser = task.Result;
             id = newUser.UserId;
         }));
         CreateNewUser(id);
@@ -104,7 +104,7 @@ public class SignUp : MonoBehaviour
     {
         DatabaseReference newUser = databaseReference.Child("users").Child(id);
         await newUser.Child("username").SetValueAsync(username.text);
-        GoToLogin();
+        OpenPanel();
     }
 
     void GetErrorMessage(AuthError errorCode)

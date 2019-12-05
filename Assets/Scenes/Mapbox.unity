@@ -1172,7 +1172,6 @@ RectTransform:
   m_Children:
   - {fileID: 7033102506594777903}
   - {fileID: 1106164039}
-  - {fileID: 979791706}
   m_Father: {fileID: 1220223451}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1711,6 +1710,7 @@ RectTransform:
   - {fileID: 569291306}
   - {fileID: 1528015630}
   - {fileID: 1311962334}
+  - {fileID: 979791706}
   m_Father: {fileID: 1220223451}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1833,7 +1833,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &979791704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1885,8 +1885,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 688642440}
-  m_RootOrder: 2
+  m_Father: {fileID: 966816224}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -2976,7 +2976,7 @@ MonoBehaviour:
   lobbies: []
   lobbyRef: {fileID: 3201304614855451065, guid: 23a66e713f3eb704b8cdf778f89d6961,
     type: 3}
-  healthBar: {fileID: 3602117884049092021}
+  healthBar: {fileID: 5022735197851725428}
   loadingScreen: {fileID: 193252337}
   loadingText: {fileID: 978814646}
 --- !u!1 &1444002675
@@ -5329,31 +5329,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_RootOrder
       value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4369215310838237861, guid: aa6f995fe59e64142b836394850b93a4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 90
-      objectReference: {fileID: 0}
-    - target: {fileID: 4369215310838237861, guid: aa6f995fe59e64142b836394850b93a4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4369215310838237861, guid: aa6f995fe59e64142b836394850b93a4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4369215310838237861, guid: aa6f995fe59e64142b836394850b93a4,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 4369215310838237861, guid: aa6f995fe59e64142b836394850b93a4,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4369215310838237864, guid: aa6f995fe59e64142b836394850b93a4,
         type: 3}

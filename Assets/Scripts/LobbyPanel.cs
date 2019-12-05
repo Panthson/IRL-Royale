@@ -40,6 +40,7 @@ public class LobbyPanel : MonoBehaviour
     {
         if (lobby)
         {
+            if (lobby.isActive == 1) exitButton.gameObject.SetActive(false);
             if (lobby.joined)
                 battleText.text = "Players Remaining: " + lobby.playerNum + '\n' + "Kills: " + Player.Instance.currentKills;
         }
