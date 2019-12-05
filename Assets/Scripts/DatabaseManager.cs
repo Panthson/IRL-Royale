@@ -122,11 +122,14 @@ public class DatabaseManager : MonoBehaviour
         DataSnapshot player = await Database.GetReference(USERS).Child(id).GetValueAsync();
         if (LoginInfo.IsGuest)
         {
+            LoginInfo.Username = ANONYMOUS_USERNAME;
             Player.Instance.username = ANONYMOUS_USERNAME;
         }
         else
         {
-            Player.Instance.username = player.Child(USERNAME).Value.ToString();
+            string username = player.Child(USERNAME).Value.ToString();
+            LoginInfo.Username = username;
+            Player.Instance.username = username;
         }
         string jsonData = JsonUtility.ToJson(Player.Instance);
         await Database.GetReference(USERS).Child(id).SetRawJsonValueAsync(jsonData);
