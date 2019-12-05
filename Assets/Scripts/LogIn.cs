@@ -16,7 +16,8 @@ public class LogIn : MonoBehaviour
 {
   
     public InputField emailInput, passwordInput;
-
+    public GameObject ErrorPanel;
+    public Text errorText;
     private DatabaseReference databaseReference;
 
     private bool signed_in = false;
@@ -32,7 +33,27 @@ public class LogIn : MonoBehaviour
     public async void Login()
     {
         Debug.Log("button pressed");
-        FirebaseUser user = await FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text);
+        FirebaseUser user = await FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text).ContinueWith((task =>
+        {
+            if (task.IsCanceled)
+            {
+                Firebase.FirebaseException e =
+              task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+
+                GetErrorMessage((AuthError)e.ErrorCode);
+                return null;
+            }
+
+            if (task.IsFaulted)
+            {
+                Firebase.FirebaseException e =
+                task.Exception.Flatten().InnerExceptions[0] as Firebase.FirebaseException;
+                GetErrorMessage((AuthError)e.ErrorCode);
+                return null;
+            }
+            return task.Result;
+        }));
+        if (user == null) return;
         LoginInfo.Email = emailInput.text;
         LoginInfo.Password = passwordInput.text;
         LoginInfo.Uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
@@ -44,6 +65,17 @@ public class LogIn : MonoBehaviour
     {
         string msg = "";
         msg = errorCode.ToString();
-        Debug.Log(msg);
+        OpenPanel(msg);
+    }
+
+    public void OpenPanel(string msg)
+    {
+        ErrorPanel.SetActive(true);
+        errorText.text = msg;
+    }
+
+    public void ClosePanel()
+    {
+        ErrorPanel.SetActive(false);
     }
 }
