@@ -57,6 +57,8 @@ public class LobbyPanel : MonoBehaviour
             timerText.text = timerValue;
             timerText2.text = timerValue;
             timerBattleText.text = timerValue;
+            if (timerValue == "0") timerBattleText.gameObject.SetActive(false);
+            else timerBattleText.gameObject.SetActive(true);
         }
     }
 

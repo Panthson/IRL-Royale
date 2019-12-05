@@ -220,7 +220,7 @@ public class Lobby : MonoBehaviour
                     Debug.Log("Match Started Without You");
                     // The match has started and you are not in
                     LobbyPanel.Instance.OpenMainPanel();
-                    lobbyRange.circle.color = new Color(173, 23, 14);
+                    lobbyRange.circle.color = new Color(173, 23, 14, 50);
                 }
             }
             // Match Ended
