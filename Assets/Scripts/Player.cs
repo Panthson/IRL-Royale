@@ -88,6 +88,8 @@ public class Player : MonoBehaviour
             else if (value <= 0)
             {
                 health = 0;
+                // TODO add death message
+                Debug.Log("You Died to " + lastAttackedBy);
             }
             else
             {
@@ -191,10 +193,11 @@ public class Player : MonoBehaviour
         }
     }
 
-    public async void SetNewKillDeathValues(bool death)
+    // TODO DEATHS
+    public async void SetNewDeathValues(bool death)
     {
-        int newKills = kills + currentKills;
-        await db.Child(KILLS).SetValueAsync(newKills.ToString());
+        //int newKills = kills + currentKills;
+        //await db.Child(KILLS).SetValueAsync(newKills.ToString());
         if (death)
         {
             deaths++;

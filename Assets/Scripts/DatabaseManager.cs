@@ -103,7 +103,7 @@ public class DatabaseManager : MonoBehaviour
         }
         else
         {
-            FirebaseUser firebaseUser = await FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync();
+            FirebaseUser firebaseUser = await Authenticator.SignInAnonymouslyAsync();
             LoginInfo.Uid = firebaseUser.UserId;
             LoginInfo.Username = ANONYMOUS_USERNAME;
         }
@@ -284,14 +284,26 @@ public class DatabaseManager : MonoBehaviour
     }
 
     // on application quit, delete player from database if guest
-    void OnApplicationPause(bool paused)
+    async void OnApplicationPause(bool paused)
     {
         if (paused)
         {
             if (Database != null)
             {
                 if (LoginInfo.IsGuest)
-                    Database.GetReference(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+                    await Database.GetReference(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+            }
+        }
+        else
+        {
+            if (Database != null)
+            {
+                if (LoginInfo.IsGuest)
+                {
+                    string jsonData = JsonUtility.ToJson(Player.Instance);
+                    await Database.GetReference(USERS).Child(LoginInfo.Uid).SetRawJsonValueAsync(jsonData);
+                }
+                    
             }
         }
     }

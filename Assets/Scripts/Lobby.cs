@@ -233,7 +233,7 @@ public class Lobby : MonoBehaviour
                 lobbyRange.circle.color = new Color(68, 0, 255, 50);
                 joined = false;
                 // TODO: Set true or false to update values of player depending on if they win or lose the match.
-                Player.Instance.SetNewKillDeathValues(false);
+                Player.Instance.SetNewDeathValues(false);
             }
 
             // Match now inProgress

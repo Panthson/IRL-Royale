@@ -83,6 +83,7 @@ public class LobbyPanel : MonoBehaviour
 
     public async void JoinLobby()
     {
+        if (lobby.inProgress == 1) return;
         await DatabaseManager.Instance.JoinLobby(lobby.lobbyId);
         joinButton.gameObject.SetActive(false);
         exitButton.gameObject.SetActive(true);
@@ -91,6 +92,7 @@ public class LobbyPanel : MonoBehaviour
 
     public async void ExitLobby()
     {
+        if (lobby.isActive == 1) return;
         await DatabaseManager.Instance.ExitLobby(lobby.lobbyId);
         exitButton.gameObject.SetActive(false);
         joinButton.gameObject.SetActive(true);
