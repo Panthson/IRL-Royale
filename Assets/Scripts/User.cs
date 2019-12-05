@@ -90,7 +90,7 @@ public class User : MonoBehaviour
     public void Death()
     {
         parent.users.Remove(this);
-        Destroy(this.gameObject);
+        Destroy(gameObject);
     }
 
     public void Disconnected()

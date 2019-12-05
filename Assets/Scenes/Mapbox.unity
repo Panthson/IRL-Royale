@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3581,6 +3581,8 @@ MonoBehaviour:
   lobbyPanel: {fileID: 1296811248}
   mainPanel: {fileID: 966816226}
   battlePanel: {fileID: 688642442}
+  winPanel: {fileID: 1279810715}
+  lossPanel: {fileID: 670261993}
   lobbyName: {fileID: 872503282}
   lobbyName2: {fileID: 349427320}
   openButton: {fileID: 1311962335}
@@ -3589,6 +3591,8 @@ MonoBehaviour:
   timerText2: {fileID: 1767744125}
   timerBattleText: {fileID: 979791704}
   battleText: {fileID: 1106164040}
+  positionText: {fileID: 962618706}
+  lossText: {fileID: 856810475}
   lobby: {fileID: 0}
   joinButton: {fileID: 1211197595}
   exitButton: {fileID: 886796505}

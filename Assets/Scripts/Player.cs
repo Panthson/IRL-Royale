@@ -89,7 +89,8 @@ public class Player : MonoBehaviour
             {
                 health = 0;
                 // TODO add death message
-                Debug.Log("You Died to " + lastAttackedBy);
+                //Debug.Log("You Died to " + lastAttackedBy);
+                LobbyPanel.Instance.OpenLossPanel(lastAttackedBy);
             }
             else
             {

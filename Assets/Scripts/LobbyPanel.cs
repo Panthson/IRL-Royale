@@ -8,6 +8,8 @@ public class LobbyPanel : MonoBehaviour
     public CanvasGroup lobbyPanel;
     public CanvasGroup mainPanel;
     public CanvasGroup battlePanel;
+    public CanvasGroup winPanel;
+    public CanvasGroup lossPanel;
     public Text lobbyName;
     public Text lobbyName2;
     private string lobbyNameValue;
@@ -17,6 +19,8 @@ public class LobbyPanel : MonoBehaviour
     public Text timerText2;
     public Text timerBattleText;
     public Text battleText;
+    public Text positionText;
+    public Text lossText;
     private string timerValue;
     public Lobby lobby;
     public Button joinButton;
@@ -58,7 +62,7 @@ public class LobbyPanel : MonoBehaviour
             timerText.text = timerValue;
             timerText2.text = timerValue;
             timerBattleText.text = timerValue;
-            if (timerValue == "0") timerBattleText.gameObject.SetActive(false);
+            if (timerValue == "0" || timerValue == "30") timerBattleText.gameObject.SetActive(false);
             else timerBattleText.gameObject.SetActive(true);
         }
     }
@@ -148,5 +152,31 @@ public class LobbyPanel : MonoBehaviour
         battlePanel.blocksRaycasts = true;
         mainPanel.alpha = 0;
         mainPanel.blocksRaycasts = false;
+    }
+
+    public void OpenWinPanel()
+    {
+        winPanel.alpha = 1;
+        winPanel.blocksRaycasts = true;
+    }
+
+    public void CloseWinPanel()
+    {
+        winPanel.alpha = 0;
+        winPanel.blocksRaycasts = false;
+    }
+
+    public void OpenLossPanel(string lastAttackedBy)
+    {
+        positionText.text = lobby.playerNum.ToString();
+        lossText.text = "Killed By:\n" + lastAttackedBy;
+        lossPanel.alpha = 1;
+        lossPanel.blocksRaycasts = true;
+    }
+
+    public void CloseLossPanel()
+    {
+        lossPanel.alpha = 0;
+        lossPanel.blocksRaycasts = false;
     }
 }

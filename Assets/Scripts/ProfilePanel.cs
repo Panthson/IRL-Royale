@@ -21,7 +21,7 @@ public class ProfilePanel : MonoBehaviour
 
     public void Open()
     {
-        Stats.text = "Username: " + LoginInfo.Username + "\nTotal Kills: " + Player.Instance.kills.ToString() + "\nTotal Deaths: " + Player.Instance.deaths.ToString();
+        Stats.text = LoginInfo.Username + "\nKills: " + Player.Instance.kills.ToString() + "\nDeaths: " + Player.Instance.deaths.ToString();
         profilePanel.alpha = 1;
         profilePanel.blocksRaycasts = true;
     }
