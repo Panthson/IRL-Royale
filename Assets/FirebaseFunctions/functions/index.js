@@ -130,6 +130,25 @@ exports.setNotInProgress = functions.database.ref('/lobbies/{lobbyId}/playerNum'
 	}
 });
 
+/* function: resetLobby
+ * description: removes the winning player from the lobby
+ * trigger: isActive == 0
+ */
+ exports.resetLobby = functions.database.ref('lobbies/{lobbyId}/isActive')
+	.onUpdate((change, context) => {
+	
+	if(parseInt(change.after.val().toString(), 10) === 0) {
+		var lobbyRef = change.after.ref.parent;
+		var playerNum = lobbyRef.child('playerNum');
+		var players = lobbyRef.child('players');
+
+		players.set(null);
+		playerNum.transaction(num => {
+			return 0;
+		})
+	}
+});
+
 /* function: setDeath
  * description: removes a player from a lobby when their HP is 0
  * trigger: player.health == 0
@@ -147,7 +166,7 @@ exports.setDeath = functions.database.ref('/users/{userID}/health')
 			var uid = context.params.userID.toString();
 			return change.after.ref.parent.child('lobby').transaction(lobby => {
 				lobbyRef.child(lobbyID).child('players').child(uid).remove();
-				return 9999;
+				return "null";
 			}, function(){
 				lobbyRef.child(lobbyID).child('playerNum').transaction(count => {
 					return count - 1;
@@ -258,14 +277,14 @@ exports.shrinkRadius = functions.database.ref('/lobbies/{lobbyId}/inProgress')
 					}
 				})
 
-				if(radius <= 5) {
+				if(radius <= 10) {
 						clearInterval(interval);
 						return null;
 				}
 
-				radius = radius - 5;
+				radius = radius - 0.5;
 				radiusRef.set(radius);
-			}, 500)
+			}, 1000)
 		})
 	} else {
 		radiusRef.set(250);

@@ -53,6 +53,7 @@ MonoBehaviour:
   radius: 0
   locationSet: 0
   currentLobby: 0
+  joined: 0
   lobbyRange: {fileID: 7052384595140314328}
 --- !u!1 &8186178093588676272
 GameObject:
