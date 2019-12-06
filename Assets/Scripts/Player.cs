@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     public float health = 100f;
     public float attack = 5f;
     public int kills = 0;
-    public int currentKills = 0;
+    private int currentKills = 0;
     public int deaths = 0;
     private bool canAttack = false;
     private Range range;
@@ -91,6 +91,7 @@ public class Player : MonoBehaviour
                 // TODO add death message
                 //Debug.Log("You Died to " + lastAttackedBy);
                 LobbyPanel.Instance.OpenLossPanel(lastAttackedBy);
+                ResetHealthAndLobby();
             }
             else
             {
@@ -121,6 +122,8 @@ public class Player : MonoBehaviour
 
         }
     }
+
+    public int CurrentKills { get => currentKills; set => currentKills = value; }
 
     public IEnumerator SetHealthBar(float health)
     {
