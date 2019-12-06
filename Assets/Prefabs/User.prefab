@@ -144,6 +144,8 @@ MonoBehaviour:
   lastAttackedBy: 
   lobby: 
   parent: {fileID: 0}
+  circle: {fileID: 8847011169553249990}
+  cube: {fileID: 8847011171456634447}
 --- !u!65 &1263045576094925719
 BoxCollider:
   m_ObjectHideFlags: 0

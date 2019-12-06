@@ -29,6 +29,9 @@ public class Lobby : MonoBehaviour
     public bool joined = false;
     private DatabaseReference db;
     public LobbyRange lobbyRange;
+    public Color baseColor;
+    public Color isActiveColor;
+    public Color inProgressColor;
     private IEnumerator resizeRadius;
     private IEnumerator checkOpen;
     public float LobbyRange
@@ -73,6 +76,12 @@ public class Lobby : MonoBehaviour
                 LobbyPanel.Instance.usersList.text = usernames;
             }
         }
+    }
+
+    [ContextMenu("SetColor")]
+    public void SetColor()
+    {
+        lobbyRange.circle.color = baseColor;
     }
 
     public void InitializeLobby(string lobbyId, int isActive, int inProgress, string location, 
@@ -214,7 +223,7 @@ public class Lobby : MonoBehaviour
                     LobbyPanel.Instance.OpenBattlePanel();
                     Player.Instance.CanAttack = true;
                     Debug.Log("change color match started with you, join = " + joined);
-                    lobbyRange.circle.color = new Color(172, 0, 255, 25);
+                    lobbyRange.circle.color = inProgressColor;
                 }
                 else
                 {
@@ -222,7 +231,7 @@ public class Lobby : MonoBehaviour
                     // The match has started and you are not in
                     LobbyPanel.Instance.OpenMainPanel();
                     Debug.Log("change color match started without you, join = " + joined);
-                    lobbyRange.circle.color = new Color(173, 23, 14, 25);
+                    lobbyRange.circle.color = isActiveColor;
                 }
             }
             // Match Ended
@@ -233,7 +242,7 @@ public class Lobby : MonoBehaviour
                 DatabaseManager.Instance.DeleteAllUsers(this);
                 // Sets Back to Green
                 Debug.Log("change color match ended");
-                lobbyRange.circle.color = new Color(68, 0, 255, 25);
+                lobbyRange.circle.color = baseColor;
                 joined = false;
                 if (snapshot.Child(PLAYERS).Child(LoginInfo.Uid).Exists)
                 {

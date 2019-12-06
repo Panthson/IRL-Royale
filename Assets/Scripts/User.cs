@@ -19,6 +19,9 @@ public class User : MonoBehaviour
     public string lobby = null;
     public Lobby parent;
     public DatabaseReference userData = null;
+    public MeshRenderer circle;
+    public MeshRenderer cube;
+
     private IEnumerator locationLerp;
 
     public void InitializeUser(string username, string location, 
@@ -103,7 +106,8 @@ public class User : MonoBehaviour
     public void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Range")) {
-            gameObject.SetActive(true);
+            circle.enabled = true;
+            cube.enabled = true;
         }
     }
 
@@ -111,7 +115,8 @@ public class User : MonoBehaviour
     {
         if (other.CompareTag("Range"))
         {
-            gameObject.SetActive(false);
+            circle.enabled = false;
+            cube.enabled = false;
         }
     }
 
