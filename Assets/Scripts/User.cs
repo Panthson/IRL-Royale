@@ -30,6 +30,7 @@ public class User : MonoBehaviour
         this.lobby = lobby;
         parent = parentLobby;
         this.userData.ValueChanged += HandleDataChanged;
+        //gameObject.SetActive(false);
         locationLerp = SetLocation(location);
         StartCoroutine(locationLerp);
     }
@@ -101,7 +102,17 @@ public class User : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("Triggered");
+        if (other.CompareTag("Range")) {
+            gameObject.SetActive(true);
+        }
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Range"))
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public void OnApplicationPause(bool paused)
@@ -112,7 +123,8 @@ public class User : MonoBehaviour
         }
     }
 
-    /*public void OnApplicationQuit()
+    /*
+    public void OnApplicationQuit()
     {
         if (this)
             userData.ValueChanged -= HandleDataChanged;

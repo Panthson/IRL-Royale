@@ -41,7 +41,7 @@ public class DatabaseManager : MonoBehaviour
 
     // PUBLIC VARIABLES
     public bool initialized;
-    
+
     public User userRef;
     public List<Lobby> lobbies;
     public Lobby lobbyRef;
@@ -69,7 +69,7 @@ public class DatabaseManager : MonoBehaviour
         loadingScreen.alpha = 1;
         loadingScreen.blocksRaycasts = true;
     }
-    
+
     // End Loading Screen
     public void EndLoad()
     {
@@ -112,7 +112,7 @@ public class DatabaseManager : MonoBehaviour
         EndLoad();
         initialized = true;
         await GetLobbies();
-        
+
     }
 
     // Adds Current Player to Database if initialized
@@ -140,7 +140,7 @@ public class DatabaseManager : MonoBehaviour
     public async Task GetUsers(DataSnapshot players, Lobby lobby)
     {
         DeleteAllUsers(lobby);
-        
+
         List<string> userIds = new List<string>();
         foreach (DataSnapshot user in players.Children)
         {
@@ -152,7 +152,7 @@ public class DatabaseManager : MonoBehaviour
             Debug.Log("ID: " + id);
         }
 
-        foreach (string id in userIds) 
+        foreach (string id in userIds)
         {
             Debug.Log("Instantiating user: " + id);
             if (id.Equals(LoginInfo.Uid))
@@ -165,7 +165,7 @@ public class DatabaseManager : MonoBehaviour
                 User u = Instantiate(userRef, Vector3.zero, Quaternion.identity, transform);
                 //Debug.Log("Username: " + userObject.Child(USERNAME).Value.ToString());
                 u.InitializeUser(userObject.Child(USERNAME).Value.ToString(),
-                    userObject.Child(LOCATION).Value.ToString(), userObject.Child(LOBBY).ToString(), 
+                    userObject.Child(LOCATION).Value.ToString(), userObject.Child(LOBBY).ToString(),
                     id, Database.GetReference(USERS).Child(userObject.Key), lobby);
                 //Debug.Log("ADDING " + u.username + " TO LIST");
                 lobby.users.Add(u);
@@ -209,6 +209,10 @@ public class DatabaseManager : MonoBehaviour
 
         }
         EndLoad();
+    }
+
+    public async void UpdateLobbies() {
+        await GetLobbies();
     }
     
     public Task JoinLobby(string lobbyId)

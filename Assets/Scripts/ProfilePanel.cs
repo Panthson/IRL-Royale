@@ -34,6 +34,9 @@ public class ProfilePanel : MonoBehaviour
 
     public void LogOut()
     {
+        if (LobbyPanel.Instance.lobby != null)
+            LobbyPanel.Instance.ExitLobby();
+
         if (Database != null)
         {
             if (LoginInfo.IsGuest)

@@ -210,6 +210,11 @@ public class Player : MonoBehaviour
         }
     }
 
+    public async void ResetHealthAndLobby() {
+        await db.Child(HEALTH).SetValueAsync(100);
+        await db.Child(LOBBY).SetValueAsync("null");
+    }
+
     // Update is called once per frame
     void Update()
     {

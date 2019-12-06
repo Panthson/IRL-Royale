@@ -213,14 +213,16 @@ public class Lobby : MonoBehaviour
                     await DatabaseManager.Instance.GetUsers(snapshot.Child(PLAYERS), this);
                     LobbyPanel.Instance.OpenBattlePanel();
                     Player.Instance.CanAttack = true;
-                    lobbyRange.circle.color = new Color(172, 0, 255, 50);
+                    Debug.Log("change color match started with you, join = " + joined);
+                    lobbyRange.circle.color = new Color(172, 0, 255, 25);
                 }
                 else
                 {
                     Debug.Log("Match Started Without You");
                     // The match has started and you are not in
                     LobbyPanel.Instance.OpenMainPanel();
-                    lobbyRange.circle.color = new Color(173, 23, 14, 50);
+                    Debug.Log("change color match started without you, join = " + joined);
+                    lobbyRange.circle.color = new Color(173, 23, 14, 25);
                 }
             }
             // Match Ended
@@ -230,7 +232,8 @@ public class Lobby : MonoBehaviour
                 Player.Instance.CanAttack = false;
                 DatabaseManager.Instance.DeleteAllUsers(this);
                 // Sets Back to Green
-                lobbyRange.circle.color = new Color(68, 0, 255, 50);
+                Debug.Log("change color match ended");
+                lobbyRange.circle.color = new Color(68, 0, 255, 25);
                 joined = false;
                 if (snapshot.Child(PLAYERS).Child(LoginInfo.Uid).Exists)
                 {

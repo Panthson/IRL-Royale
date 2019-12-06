@@ -135,7 +135,7 @@ public class LobbyPanel : MonoBehaviour
         mainPanel.alpha = 1;
         mainPanel.blocksRaycasts = true;
         battlePanel.alpha = 0;
-        battlePanel.blocksRaycasts = true;
+        battlePanel.blocksRaycasts = false;
     }
 
     public void OpenBattlePanel()
@@ -152,6 +152,8 @@ public class LobbyPanel : MonoBehaviour
         battlePanel.blocksRaycasts = true;
         mainPanel.alpha = 0;
         mainPanel.blocksRaycasts = false;
+        lobbyPanel.alpha = 0;
+        lobbyPanel.blocksRaycasts = false;
     }
 
     public void OpenWinPanel()
@@ -178,5 +180,19 @@ public class LobbyPanel : MonoBehaviour
     {
         lossPanel.alpha = 0;
         lossPanel.blocksRaycasts = false;
+    }
+
+    public void ExitLossPanel() 
+    {
+        CloseLossPanel();
+        OpenMainPanel();
+        Player.Instance.ResetHealthAndLobby();
+    }
+
+    public void ExitWinPanel()
+    {
+        CloseWinPanel();
+        OpenMainPanel();
+        Player.Instance.ResetHealthAndLobby();
     }
 }
