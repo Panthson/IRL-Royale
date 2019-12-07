@@ -104,6 +104,8 @@ public class SignUp : MonoBehaviour
     {
         DatabaseReference newUser = databaseReference.Child("users").Child(id);
         await newUser.Child("username").SetValueAsync(username.text);
+        await newUser.Child("kills").SetValueAsync(0);
+        await newUser.Child("deaths").SetValueAsync(0);
         is_SignUp = true;
     }
 

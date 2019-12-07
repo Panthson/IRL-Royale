@@ -22,7 +22,6 @@ public class LogIn : MonoBehaviour
 
     private bool signed_in = false;
     private bool error = false;
-
     private string msg;
 
     private string DATA_URL = "https://iroyale-1571440677136.firebaseio.com/";
