@@ -211,7 +211,6 @@ public class DatabaseManager : MonoBehaviour
                 l.lobbyRange.enabled = true;
                 Debug.Log(l.lobbyName);
             }
-
         }
         EndLoad();
     }
@@ -317,7 +316,9 @@ public class DatabaseManager : MonoBehaviour
                     SetDeath();
                 }
                 else
+                {
                     LobbyPanel.Instance.ExitLobby();
+                }
             }
 
             if (Database != null)

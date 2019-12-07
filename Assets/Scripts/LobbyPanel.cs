@@ -105,9 +105,13 @@ public class LobbyPanel : MonoBehaviour
     {
         if (lobby.isActive == 1) return;
         await DatabaseManager.Instance.ExitLobby(lobby.lobbyId);
-        exitButton.gameObject.SetActive(false);
-        joinButton.gameObject.SetActive(true);
-        lobby.joined = false;
+        if (this)
+        {
+            exitButton.gameObject.SetActive(false);
+            joinButton.gameObject.SetActive(true);
+            lobby.joined = false;
+        }
+       
     }
 
     public void Open()
