@@ -21,6 +21,9 @@ public class LogIn : MonoBehaviour
     private DatabaseReference databaseReference;
 
     private bool signed_in = false;
+    private bool error = false;
+
+    private string msg;
 
     private string DATA_URL = "https://iroyale-1571440677136.firebaseio.com/";
 
@@ -33,7 +36,18 @@ public class LogIn : MonoBehaviour
     public async void Login()
     {
         Debug.Log("button pressed");
-        FirebaseUser user = await FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text).ContinueWith((task =>
+
+        if (emailInput.text.Equals("") || passwordInput.text.Equals(""))
+        {
+            Debug.Log("All fields not filled in");
+            msg = "All fields not filled in";
+            error = true;
+
+            return;
+        }
+
+        FirebaseUser user = await FirebaseAuth.DefaultInstance.
+            SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text).ContinueWith((task =>
         {
             if (task.IsCanceled)
             {
@@ -53,19 +67,19 @@ public class LogIn : MonoBehaviour
             }
             return task.Result;
         }));
+
         if (user == null) return;
         LoginInfo.Email = emailInput.text;
         LoginInfo.Password = passwordInput.text;
         LoginInfo.Uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
         LoginInfo.IsGuest = false;
-        SceneManager.LoadScene("MapBox");
+        SceneManager.LoadScene("Mapbox");
     }
 
     void GetErrorMessage(AuthError errorCode)
     {
-        string msg = "";
         msg = errorCode.ToString();
-        OpenPanel(msg);
+        error = true;
     }
 
     public void OpenPanel(string msg)
@@ -77,5 +91,12 @@ public class LogIn : MonoBehaviour
     public void ClosePanel()
     {
         ErrorPanel.SetActive(false);
+        error = false;
+    }
+
+    private void Update()
+    {
+        if (error)
+            OpenPanel(msg);
     }
 }

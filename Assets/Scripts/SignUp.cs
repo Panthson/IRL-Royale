@@ -29,7 +29,7 @@ public class SignUp : MonoBehaviour
 
     private bool is_errorMessage = false;
 
-    private string msg = "";
+    private string msg;
 
     // Start is called before the first frame update
     void Start() {
@@ -41,16 +41,16 @@ public class SignUp : MonoBehaviour
         if (emailInput.text.Equals("") || passwordInput.text.Equals("") || confirmPasswordInput.text.Equals("")
             || username.text.Equals(""))
         {
-            Debug.Log("all fields not filled in");
-            OpenPanel("all fields not filled in");
+            Debug.Log("All fields not filled in");
+            OpenPanel("All fields not filled in");
 
             return;
         }
 
         if (!passwordInput.text.Equals(confirmPasswordInput.text))
         {
-            Debug.Log("password and confirm not the same");
-            OpenPanel("password and confirm not the same");
+            Debug.Log("Password and confirm password not the same");
+            OpenPanel("Password and confirm password not the same");
             return;
         }
 
@@ -75,8 +75,7 @@ public class SignUp : MonoBehaviour
         }
         string id = "";
         await FirebaseAuth.DefaultInstance.CreateUserWithEmailAndPasswordAsync(emailInput, 
-            passwordInput).ContinueWith((task =>
-        {
+            passwordInput).ContinueWith((task => {
             if (task.IsCanceled)
             {
                 Firebase.FirebaseException e =
@@ -93,18 +92,19 @@ public class SignUp : MonoBehaviour
                 GetErrorMessage((AuthError)e.ErrorCode);
                 return;
             }
+
             // Firebase user has been created.
             FirebaseUser newUser = task.Result;
             id = newUser.UserId;
+            CreateNewUser(id);
         }));
-        CreateNewUser(id);
     }
 
     async void CreateNewUser(string id)
     {
         DatabaseReference newUser = databaseReference.Child("users").Child(id);
         await newUser.Child("username").SetValueAsync(username.text);
-        OpenPanel();
+        is_SignUp = true;
     }
 
     void GetErrorMessage(AuthError errorCode)
@@ -112,11 +112,11 @@ public class SignUp : MonoBehaviour
         msg = "";
         msg = errorCode.ToString();
         is_errorMessage = true;
-        OpenPanel(msg);
+        //OpenPanel(msg);
         Debug.Log(msg);
     }
 
-    public void OpenPanel()
+    public void OpenConfirmationPanel()
     {
         if(comfPanel != null)
         {
@@ -139,13 +139,13 @@ public class SignUp : MonoBehaviour
             is_errorMessage = false;
         }
     }
-
+    
     // Update is called once per frame
     void Update()
     {
         if (is_SignUp)
         {
-            OpenPanel();
+            OpenConfirmationPanel();
         }
         if (is_errorMessage)
         {

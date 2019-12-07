@@ -50,7 +50,7 @@ public class Home : MonoBehaviour
         LoginInfo.IsGuest = true;
         LoginInfo.Uid = newUser.UserId;
 
-        SceneManager.LoadScene("MapBox");
+        SceneManager.LoadScene("Mapbox");
     }
 
     void GetErrorMessage(AuthError errorCode)
