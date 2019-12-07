@@ -32,6 +32,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         range = GetComponentInChildren<Range>();
+        HealthBar = DatabaseManager.Instance.healthBar;
     }
 
     public bool CanAttack
@@ -88,7 +89,6 @@ public class Player : MonoBehaviour
             else if (value <= 0)
             {
                 health = 0;
-                // TODO add death message
                 //Debug.Log("You Died to " + lastAttackedBy);
                 LobbyPanel.Instance.OpenLossPanel(lastAttackedBy);
                 ResetHealth();
@@ -98,8 +98,31 @@ public class Player : MonoBehaviour
                 health = value;
             }
             LobbyPanel.Instance.HealthText.text = health.ToString();
-            StopAllCoroutines();
-            StartCoroutine(SetHealthBar(health/100));
+            //StopAllCoroutines();
+            //StartCoroutine(SetHealthBar());
+            if (HealthBar.fillAmount > .01f)
+            {
+                HealthBar.fillAmount -= .01f;
+
+                if (HealthBar.fillAmount < .3f)
+                {
+                    // Under 30% health
+                    if ((int)(HealthBar.fillAmount * 100f) % 3 == 0)
+                    {
+                        HealthBar.color = Color.white;
+                    }
+                    else
+                    {
+                        HealthBar.color = Color.red;
+                    }
+                }
+            }
+            else
+            {
+                HealthBar.color = Color.red;
+            }
+            //Debug.Log(health / 100f);
+            HealthBar.fillAmount = Mathf.Lerp(HealthBar.fillAmount, health / 100f, 0.5f);
         }
     }
 
@@ -126,13 +149,9 @@ public class Player : MonoBehaviour
 
     public int CurrentKills { get => currentKills; set => currentKills = value; }
 
-    public IEnumerator SetHealthBar(float health)
+    public IEnumerator SetHealthBar()
     {
-        if (HealthBar == null)
-        {
-            HealthBar = DatabaseManager.Instance.healthBar;
-        }
-        while (HealthBar.fillAmount != health)
+        while (HealthBar.fillAmount != health/100f)
         {
             if (HealthBar.fillAmount > .01f)
             {
@@ -153,10 +172,9 @@ public class Player : MonoBehaviour
             }
             else
             {
-                health = 1f;
                 HealthBar.color = Color.red;
             }
-            HealthBar.fillAmount = Mathf.Lerp(HealthBar.fillAmount, health, Time.deltaTime * 1);
+            HealthBar.fillAmount = Mathf.Lerp(HealthBar.fillAmount, health/100f, Time.deltaTime * 0.1f);
             yield return new WaitForEndOfFrame();
         }
     }
