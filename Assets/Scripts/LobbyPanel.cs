@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Firebase.Database;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +24,7 @@ public class LobbyPanel : MonoBehaviour
     public Text positionTextRed;
     public Text lossText;
     public Text lossTextRed;
+    public Text HealthText;
     private string timerValue;
     public Lobby lobby;
     public Button joinButton;
@@ -170,12 +172,14 @@ public class LobbyPanel : MonoBehaviour
         winPanel.blocksRaycasts = false;
     }
 
-    public void OpenLossPanel(string lastAttackedBy)
+    public async void OpenLossPanel(string lastAttackedBy)
     {
+        DataSnapshot user = await DatabaseManager.Instance.GetUsername(lastAttackedBy);
+        string username = user.Value.ToString();
         positionText.text = lobby.playerNum.ToString();
         positionTextRed.text = lobby.playerNum.ToString();
-        lossText.text = "Killed by " + lastAttackedBy;
-        lossTextRed.text = "Killed by " + lastAttackedBy;
+        lossText.text = "Killed by " + username;
+        lossTextRed.text = "Killed by " + username;
         lossPanel.alpha = 1;
         lossPanel.blocksRaycasts = true;
     }
@@ -191,6 +195,7 @@ public class LobbyPanel : MonoBehaviour
         CloseLossPanel();
         OpenMainPanel();
         Player.Instance.ResetHealth();
+        joinButton.gameObject.SetActive(true);
     }
 
     public void ExitWinPanel()
@@ -198,5 +203,6 @@ public class LobbyPanel : MonoBehaviour
         CloseWinPanel();
         OpenMainPanel();
         Player.Instance.ResetHealth();
+        joinButton.gameObject.SetActive(true);
     }
 }

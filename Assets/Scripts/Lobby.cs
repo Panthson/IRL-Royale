@@ -232,6 +232,7 @@ public class Lobby : MonoBehaviour
                     LobbyPanel.Instance.OpenMainPanel();
                     Debug.Log("change color match started without you, join = " + joined);
                     lobbyRange.circle.color = isActiveColor;
+                    LobbyPanel.Instance.openButton.gameObject.SetActive(false);
                 }
             }
             // Match Ended
@@ -244,6 +245,7 @@ public class Lobby : MonoBehaviour
                 Debug.Log("change color match ended");
                 lobbyRange.circle.color = baseColor;
                 joined = false;
+                LobbyPanel.Instance.openButton.gameObject.SetActive(true);
                 if (snapshot.Child(PLAYERS).Child(LoginInfo.Uid).Exists)
                 {
                     LobbyPanel.Instance.OpenWinPanel();

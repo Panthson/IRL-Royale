@@ -97,6 +97,7 @@ public class Player : MonoBehaviour
             {
                 health = value;
             }
+            LobbyPanel.Instance.HealthText.text = health.ToString();
             StopAllCoroutines();
             StartCoroutine(SetHealthBar(health/100));
         }

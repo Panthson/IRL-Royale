@@ -68,7 +68,7 @@ exports.exitLobby = functions.https.onCall((data, context) => {
 exports.setActive = functions.database.ref('/lobbies/{lobbyId}/playerNum')
 	.onUpdate((change, context) => {
 	
-	if(parseInt(change.after.val().toString(), 10) >= 2) {
+	if(parseInt(change.after.val().toString(), 10) >= 4) {
 		var lobbyRef = change.after.ref.parent;
 		var isActiveRef = lobbyRef.child('isActive');
 
@@ -278,7 +278,7 @@ exports.shrinkRadius = functions.database.ref('/lobbies/{lobbyId}/inProgress')
 						return null;
 				}
 
-				radius = radius - 0.5;
+				radius = radius - 0.8;
 				radiusRef.set(radius);
 			}, 1000)
 		})

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
@@ -32,15 +33,21 @@ public class ProfilePanel : MonoBehaviour
         profilePanel.blocksRaycasts = false;
     }
 
-    public void LogOut()
+    public async void LogOut()
     {
         if (LobbyPanel.Instance.lobby != null)
-            LobbyPanel.Instance.ExitLobby();
+        {
+            if (LobbyPanel.Instance.lobby.isActive == 1) {
+                DatabaseManager.Instance.SetDeath();
+            }
+            else
+                LobbyPanel.Instance.ExitLobby();
+        }
 
         if (Database != null)
         {
             if (LoginInfo.IsGuest)
-                Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+                await Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
         }
         Firebase.Auth.FirebaseAuth.DefaultInstance.SignOut();
         is_LogOut = true;

@@ -20,6 +20,8 @@ public class DatabaseManager : MonoBehaviour
     private const string DEATHS = "deaths";
     private const string USERS = "users";
     private const string LOBBY = "lobby";
+    private const string HEALTH = "health";
+    private const string LASTATTACKEDBY = "lastAttackedBy";
     private const string ROOT = "";
     private string ANONYMOUS_USERNAME = "anonymous";
 
@@ -130,7 +132,10 @@ public class DatabaseManager : MonoBehaviour
             string username = player.Child(USERNAME).Value.ToString();
             LoginInfo.Username = username;
             Player.Instance.username = username;
+            Player.Instance.deaths = Int32.Parse(player.Child(DEATHS).Value.ToString());
+            Player.Instance.kills = Int32.Parse(player.Child(KILLS).Value.ToString());
         }
+
         string jsonData = JsonUtility.ToJson(Player.Instance);
         await Database.GetReference(USERS).Child(id).SetRawJsonValueAsync(jsonData);
         Player.Instance.StartUpdatingPlayer();
@@ -290,11 +295,31 @@ public class DatabaseManager : MonoBehaviour
         lobbies.Clear();
     }
 
+    public Task<DataSnapshot> GetUsername(string uid)
+    {
+        return Database.GetReference(USERS).Child(uid).Child(USERNAME).GetValueAsync();
+    }
+
+    public async void SetDeath() {
+        await Database.GetReference(USERS).Child(LoginInfo.Uid).Child(LASTATTACKEDBY).SetValueAsync("");
+        await Database.GetReference(USERS).Child(LoginInfo.Uid).Child(HEALTH).SetValueAsync(0);
+    }
+
     // on application quit, delete player from database if guest
     async void OnApplicationPause(bool paused)
     {
         if (paused)
         {
+            if (LobbyPanel.Instance.lobby != null)
+            {
+                if (LobbyPanel.Instance.lobby.isActive == 1)
+                {
+                    SetDeath();
+                }
+                else
+                    LobbyPanel.Instance.ExitLobby();
+            }
+
             if (Database != null)
             {
                 if (LoginInfo.IsGuest)
@@ -317,6 +342,16 @@ public class DatabaseManager : MonoBehaviour
     
     void OnApplicationQuit()
     {
+        if (LobbyPanel.Instance.lobby != null)
+        {
+            if (LobbyPanel.Instance.lobby.isActive == 1)
+            {
+                DatabaseManager.Instance.SetDeath();
+            }
+            else
+                LobbyPanel.Instance.ExitLobby();
+        }
+
         if (Database != null)
         {
             if (LoginInfo.IsGuest)
