@@ -91,7 +91,7 @@ public class Player : MonoBehaviour
                 // TODO add death message
                 //Debug.Log("You Died to " + lastAttackedBy);
                 LobbyPanel.Instance.OpenLossPanel(lastAttackedBy);
-                ResetHealthAndLobby();
+                ResetHealth();
             }
             else
             {
@@ -213,9 +213,8 @@ public class Player : MonoBehaviour
         }
     }
 
-    public async void ResetHealthAndLobby() {
+    public async void ResetHealth() {
         await db.Child(HEALTH).SetValueAsync(100);
-        await db.Child(LOBBY).SetValueAsync("null");
     }
 
     // Update is called once per frame

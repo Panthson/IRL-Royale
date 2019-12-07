@@ -68,7 +68,7 @@ exports.exitLobby = functions.https.onCall((data, context) => {
 exports.setActive = functions.database.ref('/lobbies/{lobbyId}/playerNum')
 	.onUpdate((change, context) => {
 	
-	if(parseInt(change.after.val().toString(), 10) >= 4) {
+	if(parseInt(change.after.val().toString(), 10) >= 2) {
 		var lobbyRef = change.after.ref.parent;
 		var isActiveRef = lobbyRef.child('isActive');
 
@@ -164,31 +164,27 @@ exports.setDeath = functions.database.ref('/users/{userID}/health')
 			var lobbyID = snap.val();
 			var lobbyRef = change.after.ref.parent.parent.parent.child('lobbies');
 			var uid = context.params.userID.toString();
-			return change.after.ref.parent.child('lobby').transaction(lobby => {
+			return lobbyRef.child(lobbyID).child('playerNum').transaction(count => {
 				lobbyRef.child(lobbyID).child('players').child(uid).remove();
-				return "null";
+				return count - 1;
 			}, function(){
-				lobbyRef.child(lobbyID).child('playerNum').transaction(count => {
-					return count - 1;
-				}, function(){
-					change.after.ref.parent.child('lastAttackedBy').once('value').then(snap => {
-						var killerID = snap.val();
+				change.after.ref.parent.child('lastAttackedBy').once('value').then(snap => {
+					var killerID = snap.val();
 
-						admin.database().ref('/users/'+killerID+'/kills').transaction(kills => {
-							if(kills === null)
-								return 1;
+					admin.database().ref('/users/'+killerID+'/kills').transaction(kills => {
+						if(kills === null)
+							return null;
+						else
+							return kills+1;
+					}, function(){
+						change.after.ref.parent.child('deaths').transaction(deaths => {
+							if(deaths === null)
+								return null;
 							else
-								return kills+1;
-						}, function(){
-							change.after.ref.parent.child('deaths').transaction(deaths => {
-								if(deaths === null)
-									return 1;
-								else
-									return deaths+1;
-							})
+								return deaths+1;
 						})
-					});
-				})
+					})
+				});
 			})
 		})
 	}

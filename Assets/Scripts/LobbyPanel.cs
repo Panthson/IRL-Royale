@@ -20,7 +20,9 @@ public class LobbyPanel : MonoBehaviour
     public Text timerBattleText;
     public Text battleText;
     public Text positionText;
+    public Text positionTextRed;
     public Text lossText;
+    public Text lossTextRed;
     private string timerValue;
     public Lobby lobby;
     public Button joinButton;
@@ -171,7 +173,9 @@ public class LobbyPanel : MonoBehaviour
     public void OpenLossPanel(string lastAttackedBy)
     {
         positionText.text = lobby.playerNum.ToString();
-        lossText.text = "Killed By:\n" + lastAttackedBy;
+        positionTextRed.text = lobby.playerNum.ToString();
+        lossText.text = "Killed by " + lastAttackedBy;
+        lossTextRed.text = "Killed by " + lastAttackedBy;
         lossPanel.alpha = 1;
         lossPanel.blocksRaycasts = true;
     }
@@ -186,13 +190,13 @@ public class LobbyPanel : MonoBehaviour
     {
         CloseLossPanel();
         OpenMainPanel();
-        Player.Instance.ResetHealthAndLobby();
+        Player.Instance.ResetHealth();
     }
 
     public void ExitWinPanel()
     {
         CloseWinPanel();
         OpenMainPanel();
-        Player.Instance.ResetHealthAndLobby();
+        Player.Instance.ResetHealth();
     }
 }
