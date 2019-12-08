@@ -7,7 +7,7 @@ public static class LoginInfo
     private static string email = "test@gmail.com";
     private static string password = "testtest";
     private static string username = "test";
-    private static string uid = "1QhRyxGhfYNG6YHY0IfQL5xLhNz2";
+    private static string uid = "LxbDppjHLNVVBhXg2sEIOxLmEi32";
     private static bool isGuest = false;
 
     public static string Email

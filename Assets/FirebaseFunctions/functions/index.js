@@ -50,13 +50,9 @@ exports.exitLobby = functions.https.onCall((data, context) => {
 	const playerID = data.playerId;
 	const lobbyID = data.lobbyId;
 
-	admin.database().ref('/users/'+playerID+'/lobby').transaction(lobby => {
+	admin.database().ref('/lobbies/'+lobbyID+'/playerNum').transaction(count => {
 		admin.database().ref('/lobbies/'+lobbyID+'/players/'+playerID).remove();
-		return "null";
-	}, function(){
-		admin.database().ref('/lobbies/'+lobbyID+'/playerNum').transaction(count => {
-			return count - 1;
-		})
+		return count - 1;
 	})
 });
 
