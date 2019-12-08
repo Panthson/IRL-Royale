@@ -120,7 +120,10 @@ public class DatabaseManager : MonoBehaviour
     // Adds Current Player to Database if initialized
     public async Task SetPlayer(string id)
     {
-        Player.SetDatabaseReference(Database.GetReference(USERS).Child(id));
+        Debug.Log("id "+id);
+        Debug.Log("logininfo id " + LoginInfo.Uid);
+
+        Player.Instance.SetDatabaseReference(Database.GetReference(USERS).Child(id));
         DataSnapshot player = await Database.GetReference(USERS).Child(id).GetValueAsync();
         if (LoginInfo.IsGuest)
         {
@@ -324,7 +327,10 @@ public class DatabaseManager : MonoBehaviour
             if (Database != null)
             {
                 if (LoginInfo.IsGuest)
+                {
                     await Database.GetReference(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+                }
+                    
             }
         }
         else

@@ -14,15 +14,27 @@ public class ProfilePanel : MonoBehaviour
     private string DATA_URL = "https://iroyale-1571440677136.firebaseio.com/";
     private const string USERS = "users";
 
-    private bool is_LogOut = false;
+    public bool is_LogOut = false;
 
     public DatabaseReference Database;
     public CanvasGroup profilePanel;
     public Text Stats;
 
+    private static ProfilePanel instance;
+    public static ProfilePanel Instance {
+        get {
+            if (instance == null) {
+                instance = FindObjectOfType<ProfilePanel>();
+            }
+
+            return instance;
+        }
+    }
+
     public void Open()
     {
-        Stats.text = LoginInfo.Username + "\nKills: " + Player.Instance.kills.ToString() + "\nDeaths: " + Player.Instance.deaths.ToString();
+        Stats.text = LoginInfo.Username + "\nKills: " + Player.Instance.kills.ToString() +
+            "\nDeaths: " + Player.Instance.deaths.ToString();
         profilePanel.alpha = 1;
         profilePanel.blocksRaycasts = true;
     }
@@ -33,8 +45,10 @@ public class ProfilePanel : MonoBehaviour
         profilePanel.blocksRaycasts = false;
     }
 
-    public async void LogOut()
+    public void LogOut()
     {
+        is_LogOut = true;
+
         if (LobbyPanel.Instance.lobby != null)
         {
             if (LobbyPanel.Instance.lobby.isActive == 1) {
@@ -46,11 +60,13 @@ public class ProfilePanel : MonoBehaviour
 
         if (Database != null)
         {
-            if (LoginInfo.IsGuest)
-                await Database.Child(USERS).Child(LoginInfo.Uid).RemoveValueAsync();
+            Player.Instance.RemoveListener();
         }
-        Firebase.Auth.FirebaseAuth.DefaultInstance.SignOut();
-        is_LogOut = true;
+
+        Player.Instance.RemoveDatabaseReference();
+
+        FirebaseAuth.DefaultInstance.SignOut();
+        SceneManager.LoadScene("Home");
     }
 
     void Start()
@@ -64,7 +80,7 @@ public class ProfilePanel : MonoBehaviour
     {
         if (is_LogOut)
         {
-            SceneManager.LoadScene("Home");
+            
         }
     }
 }

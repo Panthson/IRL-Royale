@@ -41,14 +41,14 @@ public class Home : MonoBehaviour
         SceneManager.LoadScene("Home");
     }
 
-    public async void LogInAnonymous()
+    public void LogInAnonymous()
     {
-        FirebaseUser newUser = await FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync();
-        Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-            newUser.DisplayName, newUser.UserId);
+        //FirebaseUser newUser = await FirebaseAuth.DefaultInstance.SignInAnonymouslyAsync();
+        //Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+        //    newUser.DisplayName, newUser.UserId);
 
         LoginInfo.IsGuest = true;
-        LoginInfo.Uid = newUser.UserId;
+        //LoginInfo.Uid = newUser.UserId;
 
         SceneManager.LoadScene("Mapbox");
     }

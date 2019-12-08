@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     private bool canAttack = false;
     private Range range;
     private Image HealthBar;
-    public static DatabaseReference db;
+    public DatabaseReference db;
 
     void Start()
     {
@@ -179,12 +179,21 @@ public class Player : MonoBehaviour
         }
     }
 
-    public static void SetDatabaseReference (DatabaseReference reference)
+    public void SetDatabaseReference (DatabaseReference reference)
     {
         if (db == null)
         {
             db = reference;
         }
+    }
+
+    public async void RemoveDatabaseReference() {
+        if (LoginInfo.IsGuest)
+        {
+            await db.RemoveValueAsync();
+        }
+
+        db = null;
     }
 
     public void StartUpdatingPlayer()
@@ -239,7 +248,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        SetLocation();
+        if(!ProfilePanel.Instance.is_LogOut)
+            SetLocation();
     }
 
     // Returns the String of latitude and longitude from mapbox
@@ -260,6 +270,14 @@ public class Player : MonoBehaviour
         {
             
         }
+    }
+
+    public void RemoveListener() { 
+        db.ValueChanged -= HandleDataChanged;
+    }
+
+    public void AddListener() {
+        db.ValueChanged += HandleDataChanged;
     }
 
     /*public void OnApplicationQuit()
