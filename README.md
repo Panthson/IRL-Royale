@@ -17,11 +17,9 @@ IRL RoyaLe only works on Android, although an iOS build is on its way. Make sure
 
 4. When enough players have joined the lobby, the countdown for the game start will begin.
 
-<img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Lobby%20Start%20Screen.png" alt="The lobby started screen" width="200px" />
 
 5. When you're at the game screen, enemy players will appear when they are close enough. Tap the screen to attack them!
 
-<img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Battle%20Screen.png" alt="The battle started screen" width="200px" />
 
 6. What happens when you're the last player standing? What if you die beforehand? Guess you'll have to play to find out.
 ## Installing
@@ -34,9 +32,10 @@ The .apk file in the root directory can be [installed] from the Android device. 
 Creating the .apk file can be done as follows:
 
 1. Add a signature to the Unity project. Go to **Player Settings>Android>Publishing Settings** and uncheck **Custom Keystore** to use the standard Android debug key, or add your own key.
+![The Android tab in Unity's Player Settings](https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Android%20Settings%20Tab.PNG)
 2. Go to **Build Settings** and go to the **Android** tab denoted by the icon below:
-![The Android tab in Unity's build settings](https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Android%20Settings%20Tab.PNG)
-3. Click **Build** in the bottom-right corner of the **Build Settings** screen.
+![The Android tab in Unity's Build Settings](https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Build%20Settings.PNG)
+    3. Click **Build** in the bottom-right corner of the **Build Settings** screen.
 4. Specify a location and name for the .apk file.
 ## Example Source Code
 Here's a glimpse of our reusable database reading module. If you like it, or especially if you dislike it, we encourage you to contribute!
