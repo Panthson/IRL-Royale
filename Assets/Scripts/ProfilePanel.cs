@@ -49,6 +49,7 @@ public class ProfilePanel : MonoBehaviour
     {
         is_LogOut = true;
 
+        Player.SetDatabaseReference(null);
         if (LobbyPanel.Instance.lobby != null)
         {
             if (LobbyPanel.Instance.lobby.isActive == 1) {

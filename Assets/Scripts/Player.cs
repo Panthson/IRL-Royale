@@ -181,10 +181,7 @@ public class Player : MonoBehaviour
 
     public void SetDatabaseReference (DatabaseReference reference)
     {
-        if (db == null)
-        {
-            db = reference;
-        }
+        db = reference;
     }
 
     public async void RemoveDatabaseReference() {
