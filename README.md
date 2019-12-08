@@ -15,11 +15,9 @@ IRL RoyaLe only works on Android, although an iOS build is on its way. Make sure
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Lobby%20Screen.png" alt="The in a lobby screen" width="200px" />
 
-4. When enough players have joined the lobby, the countdown for the game start will begin.
+4. When enough players have joined the lobby, the countdown for the battle to start will begin.
 
-
-5. When you're at the game screen, enemy players will appear when they are close enough. Tap the screen to attack them!
-
+5. When you're at the battle screen, enemy players will appear when they are close enough. Tap the screen to attack them!
 
 6. What happens when you're the last player standing? What if you die beforehand? Guess you'll have to play to find out.
 ## Installing
