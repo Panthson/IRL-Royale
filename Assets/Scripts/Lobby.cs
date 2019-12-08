@@ -221,6 +221,7 @@ public class Lobby : MonoBehaviour
                     // You are in this match and it has started
                     await DatabaseManager.Instance.GetUsers(snapshot.Child(PLAYERS), this);
                     LobbyPanel.Instance.OpenBattlePanel();
+                    LobbyPanel.Instance.joinButton.gameObject.SetActive(true);
                     Player.Instance.CanAttack = true;
                     Debug.Log("change color match started with you, join = " + joined);
                     lobbyRange.circle.color = inProgressColor;
@@ -238,6 +239,7 @@ public class Lobby : MonoBehaviour
             // Match Ended
             else
             {
+                bool userWin = snapshot.Child(PLAYERS).Child(LoginInfo.Uid).Exists;
                 Debug.Log("Match Ended");
                 Player.Instance.CanAttack = false;
                 DatabaseManager.Instance.DeleteAllUsers(this);
@@ -246,11 +248,9 @@ public class Lobby : MonoBehaviour
                 lobbyRange.circle.color = baseColor;
                 joined = false;
                 LobbyPanel.Instance.openButton.gameObject.SetActive(true);
-                if (snapshot.Child(PLAYERS).Child(LoginInfo.Uid).Exists)
-                {
-                    LobbyPanel.Instance.OpenWinPanel();
-                }
-                LobbyPanel.Instance.OpenMainPanel();
+
+                if (userWin) LobbyPanel.Instance.OpenWinPanel();
+                else LobbyPanel.Instance.OpenMainPanel();
             }
 
             // Match now inProgress

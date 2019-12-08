@@ -179,10 +179,10 @@ public class LobbyPanel : MonoBehaviour
 
     public async void OpenLossPanel(string lastAttackedBy)
     {
-        DataSnapshot user = await DatabaseManager.Instance.GetUsername(lastAttackedBy);
-        string username = user.Value.ToString();
         positionText.text = lobby.playerNum.ToString();
         positionTextRed.text = lobby.playerNum.ToString();
+        DataSnapshot user = await DatabaseManager.Instance.GetUsername(lastAttackedBy);
+        string username = user.Value.ToString();
         lossText.text = "Killed by " + username;
         lossTextRed.text = "Killed by " + username;
         lossPanel.alpha = 1;
@@ -197,6 +197,7 @@ public class LobbyPanel : MonoBehaviour
 
     public void ExitLossPanel() 
     {
+        CloseWinPanel();
         CloseLossPanel();
         OpenMainPanel();
         Player.Instance.ResetHealth();
@@ -206,6 +207,7 @@ public class LobbyPanel : MonoBehaviour
     public void ExitWinPanel()
     {
         CloseWinPanel();
+        CloseLossPanel();
         OpenMainPanel();
         Player.Instance.ResetHealth();
         joinButton.gameObject.SetActive(true);
