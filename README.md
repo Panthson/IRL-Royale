@@ -32,10 +32,15 @@ The .apk file in the root directory can be [installed] from the Android device. 
 Creating the .apk file can be done as follows:
 
 1. Add a signature to the Unity project. Go to **Player Settings>Android>Publishing Settings** and uncheck **Custom Keystore** to use the standard Android debug key, or add your own key.
+
 ![The Android tab in Unity's Player Settings](https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Android%20Settings%20Tab.PNG)
+
 2. Go to **Build Settings** and go to the **Android** tab denoted by the icon below:
+
 ![The Android tab in Unity's Build Settings](https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Build%20Settings.PNG)
-    3. Click **Build** in the bottom-right corner of the **Build Settings** screen.
+
+3. Click **Build** in the bottom-right corner of the **Build Settings** screen.
+
 4. Specify a location and name for the .apk file.
 ## Example Source Code
 Here's a glimpse of our reusable database reading module. If you like it, or especially if you dislike it, we encourage you to contribute!
