@@ -49,7 +49,15 @@ public class ProfilePanel : MonoBehaviour
     {
         is_LogOut = true;
 
-        Player.SetDatabaseReference(null);
+
+        if (Database != null)
+        {
+            Player.Instance.RemoveListener();
+        }
+
+        Player.Instance.RemoveDatabaseReference();
+        Player.Instance.SetDatabaseReference(null);
+
         if (LobbyPanel.Instance.lobby != null)
         {
             if (LobbyPanel.Instance.lobby.isActive == 1) {
@@ -58,13 +66,6 @@ public class ProfilePanel : MonoBehaviour
             else
                 LobbyPanel.Instance.ExitLobby();
         }
-
-        if (Database != null)
-        {
-            Player.Instance.RemoveListener();
-        }
-
-        Player.Instance.RemoveDatabaseReference();
 
         FirebaseAuth.DefaultInstance.SignOut();
         SceneManager.LoadScene("Home");

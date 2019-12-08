@@ -189,8 +189,6 @@ public class Player : MonoBehaviour
         {
             await db.RemoveValueAsync();
         }
-
-        db = null;
     }
 
     public void StartUpdatingPlayer()
