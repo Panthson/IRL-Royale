@@ -3,27 +3,27 @@
 IRL RoyaLe is a retro-cyberpunk themed battle royale game that is played in real life. It supports 2 - 50 players, and is great fun when playing as a group!
 ## Quck Start Guide
 IRL RoyaLe only works on Android, although an iOS build is on its way. Make sure the app is [installed] beforehand!
-To enter the game, open the app and wait for the home screen to load.
+1. To enter the game, open the app and wait for the home screen to load.
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Home%20Screen.png" alt="The home screen" width="200px" />
 
-Create an account or hit "Guest" if you want to hit the ground running.
+2. Create an account or hit "Guest" if you want to hit the ground running.
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Find%20Lobby%20Screen.png" alt="The finding a lobby screen" width="200px" />
 
-Then, walk to a nearby lobby. When you're in the area of a lobby, the Join button should appear. Tap it to join the lobby.
+3. Then, walk to a nearby lobby. When you're in the area of a lobby, the Join button should appear. Tap it to join the lobby.
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Lobby%20Screen.png" alt="The in a lobby screen" width="200px" />
 
-When enough players have joined the lobby, the countdown for the game start will begin.
+4. When enough players have joined the lobby, the countdown for the game start will begin.
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Lobby%20Start%20Screen.png" alt="The lobby started screen" width="200px" />
 
-When you're at the game screen, enemy players will appear when they are close enough. Tap the screen to attack them!
+5. When you're at the game screen, enemy players will appear when they are close enough. Tap the screen to attack them!
 
 <img src="https://raw.githubusercontent.com/chenjefferson/IRL-Royale-Doc-Assets/master/Battle%20Screen.png" alt="The battle started screen" width="200px" />
 
-What happens when you're the last player standing? What if you die beforehand? Guess you'll have to play to find out.
+6. What happens when you're the last player standing? What if you die beforehand? Guess you'll have to play to find out.
 ## Installing
 The .apk file in the root directory can be [installed] from the Android device. Steps are below:
 
