@@ -21,6 +21,8 @@ public class Home : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl(DATA_URL);
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         Input.location.Start();
