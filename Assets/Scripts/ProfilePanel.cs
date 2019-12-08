@@ -35,6 +35,7 @@ public class ProfilePanel : MonoBehaviour
 
     public async void LogOut()
     {
+        Player.SetDatabaseReference(null);
         if (LobbyPanel.Instance.lobby != null)
         {
             if (LobbyPanel.Instance.lobby.isActive == 1) {

@@ -181,10 +181,7 @@ public class Player : MonoBehaviour
 
     public static void SetDatabaseReference (DatabaseReference reference)
     {
-        if (db == null)
-        {
-            db = reference;
-        }
+        db = reference;
     }
 
     public void StartUpdatingPlayer()
