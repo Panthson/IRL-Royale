@@ -230,6 +230,7 @@ public class DatabaseManager : MonoBehaviour
         data["lobbyId"] = lobbyId;
 
         var function = Functions.GetHttpsCallable("joinLobby");
+        Player.Instance.lobby = lobbyId;
 
         return function.CallAsync(data).ContinueWith((task) =>
         {
@@ -244,6 +245,7 @@ public class DatabaseManager : MonoBehaviour
         data["lobbyId"] = lobbyId;
 
         var function = Functions.GetHttpsCallable("exitLobby");
+        Player.Instance.lobby = null;
 
         return function.CallAsync(data).ContinueWith((task) =>
         {
@@ -318,10 +320,8 @@ public class DatabaseManager : MonoBehaviour
                 {
                     SetDeath();
                 }
-                else
-                {
+                else if (LobbyPanel.Instance.lobby.joined)
                     LobbyPanel.Instance.ExitLobby();
-                }
             }
 
             if (Database != null)
@@ -355,7 +355,7 @@ public class DatabaseManager : MonoBehaviour
             {
                 DatabaseManager.Instance.SetDeath();
             }
-            else
+            else if (LobbyPanel.Instance.lobby.joined)
                 LobbyPanel.Instance.ExitLobby();
         }
 

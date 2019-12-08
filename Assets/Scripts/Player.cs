@@ -212,8 +212,8 @@ public class Player : MonoBehaviour
             }
             kills = int.Parse(args.Snapshot.Child(KILLS).Value.ToString());
             deaths = int.Parse(args.Snapshot.Child(DEATHS).Value.ToString());
-            lobby = args.Snapshot.Child(LOBBY).Value != null ?
-                    args.Snapshot.Child(LOBBY).Value.ToString() : "";
+            //lobby = args.Snapshot.Child(LOBBY).Value != null ?
+            //        args.Snapshot.Child(LOBBY).Value.ToString() : "";
             lastAttackedBy = args.Snapshot.Child(LAST_ATTACKED).Value != null ?
                     args.Snapshot.Child(LAST_ATTACKED).Value.ToString() : "";
             /*Debug.Log("Health: " + health
@@ -255,6 +255,7 @@ public class Player : MonoBehaviour
         await db.Child(LOCATION).SetValueAsync(location);
     }
 
+    /*
     public void OnApplicationPause(bool paused)
     {
         if (paused)
@@ -265,7 +266,7 @@ public class Player : MonoBehaviour
         {
             
         }
-    }
+    }*/
 
     public void RemoveListener() { 
         db.ValueChanged -= HandleDataChanged;

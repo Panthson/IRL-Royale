@@ -63,7 +63,7 @@ public class ProfilePanel : MonoBehaviour
             if (LobbyPanel.Instance.lobby.isActive == 1) {
                 DatabaseManager.Instance.SetDeath();
             }
-            else
+            else if(LobbyPanel.Instance.lobby.joined)
                 LobbyPanel.Instance.ExitLobby();
         }
 

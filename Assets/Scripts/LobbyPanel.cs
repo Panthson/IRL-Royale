@@ -104,6 +104,7 @@ public class LobbyPanel : MonoBehaviour
     public async void ExitLobby()
     {
         if (lobby.isActive == 1) return;
+
         await DatabaseManager.Instance.ExitLobby(lobby.lobbyId);
         if (this)
         {
