@@ -206,10 +206,7 @@ public class Player : MonoBehaviour
         // Do something with the data in args.Snapshot
         if (this)
         {
-            if (Health != 0)
-            {
-                Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
-            }
+            Health = float.Parse(args.Snapshot.Child(HEALTH).Value.ToString());
             kills = int.Parse(args.Snapshot.Child(KILLS).Value.ToString());
             deaths = int.Parse(args.Snapshot.Child(DEATHS).Value.ToString());
             //lobby = args.Snapshot.Child(LOBBY).Value != null ?
