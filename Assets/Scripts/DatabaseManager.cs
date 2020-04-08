@@ -90,7 +90,7 @@ public class DatabaseManager : MonoBehaviour
         loadingText.text = "Initializing Firebase...";
         FirebaseApp app = FirebaseApp.DefaultInstance;
         // Link to Database
-        app.SetEditorDatabaseUrl("https://iroyale-1571440677136.firebaseio.com/");
+        app.SetEditorDatabaseUrl("FIREBASE DATABASE LINK");
         if (app.Options.DatabaseUrl != null)
             app.SetEditorDatabaseUrl(app.Options.DatabaseUrl);
         // user authentication
